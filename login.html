@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kindgeld — Leer je kind slim sparen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #1D9E75;
+      --green-light: #E1F5EE;
+      --green-dark: #085041;
+      --orange: #D85A30;
+      --orange-light: #FAECE7;
+      --amber: #EF9F27;
+      --amber-light: #FAEEDA;
+      --text: #1a1a1a;
+      --text-muted: #6b7280;
+      --border: rgba(0,0,0,0.1);
+      --bg: #FAFAF8;
+      --white: #ffffff;
+      --radius: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── FLOATING SHAPES BACKGROUND ── */
+    .bg-shapes {
+      position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+    }
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.07;
+    }
+    .shape-1 { width: 500px; height: 500px; background: var(--green); top: -150px; right: -100px; }
+    .shape-2 { width: 300px; height: 300px; background: var(--amber); bottom: 50px; left: -80px; }
+    .shape-3 { width: 200px; height: 200px; background: var(--orange); top: 40%; left: 60%; }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 32px;
+      max-width: 1100px; margin: 0 auto; width: 100%;
+    }
+    .logo {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: 26px; font-weight: 800;
+      color: var(--orange);
+      text-decoration: none;
+    }
+    .logo span { color: var(--green); }
+    .logo em { font-style: normal; font-size: 20px; }
+
+    /* ── MAIN LAYOUT ── */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px 48px;
+      position: relative; z-index: 1;
+    }
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    /* ── LEFT: HERO ── */
+    .hero { padding: 0 16px; }
+    .hero-pig {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .hero h1 {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: 40px; font-weight: 800;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: var(--green); }
+    .hero p {
+      font-size: 17px; color: var(--text-muted);
+      line-height: 1.7; margin-bottom: 28px;
+    }
+    .hero-features { display: flex; flex-direction: column; gap: 10px; }
+    .feat {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; font-weight: 700; color: var(--text);
+    }
+    .feat-icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .feat-icon.g { background: var(--green-light); }
+    .feat-icon.a { background: var(--amber-light); }
+    .feat-icon.o { background: var(--orange-light); }
+
+    /* ── RIGHT: CARD ── */
+    .card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 36px 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+    .tab {
+      flex: 1; padding: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px; font-weight: 700;
+      border: none; background: transparent;
+      border-radius: 9px; cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: var(--white);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    /* ── FORM ── */
+    .form { display: none; }
+    .form.active { display: block; }
+
+    .form-title {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: 22px; font-weight: 700;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .form-sub {
+      font-size: 13px; color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .field { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 13px; font-weight: 700;
+      color: var(--text); margin-bottom: 6px;
+    }
+    input[type="text"], input[type="email"], input[type="password"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px; color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: var(--green); }
+    input::placeholder { color: #c0c0c0; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .plan-pick { margin-bottom: 20px; }
+    .plan-pick label { margin-bottom: 10px; }
+    .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .plan {
+      border: 1.5px solid var(--border);
+      border-radius: 12px; padding: 12px;
+      cursor: pointer; transition: all 0.2s;
+      position: relative;
+    }
+    .plan:hover { border-color: var(--green); }
+    .plan.selected { border-color: var(--green); background: var(--green-light); }
+    .plan-name { font-size: 13px; font-weight: 800; color: var(--text); }
+    .plan-price { font-family: 'Baloo 2', sans-serif; font-size: 18px; font-weight: 700; color: var(--green); }
+    .plan-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .plan-badge {
+      position: absolute; top: -8px; right: 8px;
+      background: var(--orange); color: white;
+      font-size: 10px; font-weight: 800;
+      padding: 2px 8px; border-radius: 20px;
+    }
+
+    .btn-main {
+      width: 100%; padding: 14px;
+      background: var(--green);
+      color: white; border: none;
+      border-radius: 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px; font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+    .btn-main:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .btn-main:active { transform: translateY(0); }
+
+    .divider {
+      text-align: center; margin: 16px 0;
+      color: var(--text-muted); font-size: 12px;
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: ''; position: absolute;
+      top: 50%; width: 40%; height: 1px;
+      background: var(--border);
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .btn-google {
+      width: 100%; padding: 12px;
+      background: white; border: 1.5px solid var(--border);
+      border-radius: 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center; gap: 8px;
+      color: var(--text); transition: background 0.2s;
+    }
+    .btn-google:hover { background: var(--bg); }
+
+    .terms {
+      font-size: 11px; color: var(--text-muted);
+      text-align: center; margin-top: 14px;
+      line-height: 1.6;
+    }
+    .terms a { color: var(--green); text-decoration: none; font-weight: 700; }
+
+    .forgot {
+      text-align: right; margin-bottom: 16px;
+      font-size: 12px; font-weight: 700;
+    }
+    .forgot a { color: var(--green); text-decoration: none; }
+
+    /* ── SUCCESS STATE ── */
+    .success-state {
+      display: none; text-align: center; padding: 20px 0;
+    }
+    .success-state.show { display: block; }
+    .success-icon { font-size: 56px; margin-bottom: 12px; }
+    .success-state h3 {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: 22px; font-weight: 700;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .success-state p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── SOCIAL PROOF ── */
+    .social-proof {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 24px;
+      padding: 12px 16px;
+      background: var(--green-light);
+      border-radius: 12px;
+    }
+    .avatars { display: flex; }
+    .av {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      margin-left: -6px;
+    }
+    .av:first-child { margin-left: 0; }
+    .av-1 { background: #FAC775; color: #412402; }
+    .av-2 { background: #AFA9EC; color: #26215C; }
+    .av-3 { background: #F0997B; color: #4A1B0C; }
+    .av-4 { background: #85B7EB; color: #042C53; }
+    .sp-text { font-size: 12px; font-weight: 700; color: var(--green-dark); }
+    .sp-text span { color: var(--text-muted); font-weight: 400; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .page-grid { grid-template-columns: 1fr; gap: 32px; }
+      .hero { display: none; }
+      nav { padding: 16px 20px; }
+      main { padding: 12px 16px 40px; align-items: flex-start; }
+      .card { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <nav>
+    <a href="/" class="logo">Kind<span>geld</span></a>
+  </nav>
+
+  <main>
+    <div class="page-grid">
+
+      <!-- LEFT: HERO -->
+      <div class="hero">
+        <span class="hero-pig">🐷</span>
+        <h1>Leer je kind <span>slim sparen</span> en doelen bereiken</h1>
+        <p>Kindgeld maakt sparen leuk voor kinderen van 4 tot 14 jaar — met uitdagingen, beloningen en oudercontrole.</p>
+        <div class="hero-features">
+          <div class="feat"><div class="feat-icon g">🎯</div>Spaardoelen instellen & bijhouden</div>
+          <div class="feat"><div class="feat-icon a">🏆</div>Wekelijkse uitdagingen met munten verdienen</div>
+          <div class="feat"><div class="feat-icon o">👨‍👩‍👦</div>Ouderportaal met volledige controle</div>
+        </div>
+        <div class="social-proof">
+          <div class="avatars">
+            <div class="av av-1">S</div>
+            <div class="av av-2">M</div>
+            <div class="av av-3">J</div>
+            <div class="av av-4">R</div>
+          </div>
+          <div class="sp-text">Al 2.400+ gezinnen gestart <span>— gratis beginnen!</span></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: AUTH CARD -->
+      <div class="card">
+
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('register')">Account aanmaken</button>
+          <button class="tab" onclick="switchTab('login')">Inloggen</button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div class="form active" id="form-register">
+          <div class="form-title">Gratis starten 🎉</div>
+          <div class="form-sub">Eerste maand gratis — daarna €4,95/maand</div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Jouw voornaam</label>
+              <input type="text" placeholder="Sara">
+            </div>
+            <div class="field">
+              <label>Achternaam</label>
+              <input type="text" placeholder="de Vries">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>E-mailadres</label>
+            <input type="email" placeholder="sara@email.nl">
+          </div>
+
+          <div class="field">
+            <label>Wachtwoord</label>
+            <input type="password" placeholder="Minimaal 8 tekens">
+          </div>
+
+          <div class="plan-pick">
+            <label>Kies je abonnement</label>
+            <div class="plans">
+              <div class="plan" onclick="selectPlan(this)">
+                <div class="plan-name">Gratis</div>
+                <div class="plan-price">€0</div>
+                <div class="plan-desc">1 kind · basis functies</div>
+              </div>
+              <div class="plan selected" onclick="selectPlan(this)">
+                <div class="plan-badge">Populairste</div>
+                <div class="plan-name">Gezin</div>
+                <div class="plan-price">€4,95<small style="font-size:12px;color:#888">/mnd</small></div>
+                <div class="plan-desc">Tot 4 kinderen · alles</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-main" onclick="handleRegister()">Account aanmaken →</button>
+
+          <div class="divider">of</div>
+          <button class="btn-google" onclick="handleRegister()">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+            Doorgaan met Google
+          </button>
+
+          <p class="terms">Door te registreren ga je akkoord met onze <a href="#">voorwaarden</a> en <a href="#">privacybeleid</a>. Je kunt altijd opzeggen.</p>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="form" id="form-login">
+          <div class="form-title">Welkom terug! 👋</div>
+          <div class="form-sub">Log in op jouw Kindgeld account</div>
+
+          <div class="field">
+            <label>E-mailadres</label>
+            <input type="email" placeholder="sara@email.nl">
+          </div>
+
+          <div class="field">
+            <label>Wachtwoord</label>
+            <input type="password" placeholder="Jouw wachtwoord">
+          </div>
+
+          <div class="forgot"><a href="#">Wachtwoord vergeten?</a></div>
+
+          <button class="btn-main" onclick="handleLogin()">Inloggen →</button>
+
+          <div class="divider">of</div>
+          <button class="btn-google" onclick="handleLogin()">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+            Doorgaan met Google
+          </button>
+        </div>
+
+        <!-- SUCCESS STATE -->
+        <div class="success-state" id="success">
+          <div class="success-icon">🎉</div>
+          <h3>Welkom bij Kindgeld!</h3>
+          <p>Je account is aangemaakt. We sturen je een bevestigingsmail naar je e-mailadres. Daarna kun je meteen je eerste kindprofiel aanmaken!</p>
+          <button class="btn-main" style="margin-top:20px" onclick="window.location.href='dashboard.html'">Start met instellen →</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+      document.getElementById('success').classList.remove('show');
+      if (tab === 'register') {
+        document.querySelectorAll('.tab')[0].classList.add('active');
+        document.getElementById('form-register').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab')[1].classList.add('active');
+        document.getElementById('form-login').classList.add('active');
+      }
+    }
+
+    function selectPlan(el) {
+      document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function handleRegister() {
+      document.getElementById('form-register').style.display = 'none';
+      document.querySelectorAll('.tabs')[0].style.display = 'none';
+      document.getElementById('success').classList.add('show');
+    }
+
+    function handleLogin() {
+      document.getElementById('form-login').style.display = 'none';
+      document.querySelectorAll('.tabs')[0].style.display = 'none';
+      document.getElementById('success').classList.add('show');
+    }
+  </script>
+</body>
+</html>

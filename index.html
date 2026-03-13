@@ -3,477 +3,726 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kindgeld — Leer je kind slim sparen</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>Kindgeld — Leer je kind slim sparen 🐷</title>
+  <meta name="description" content="De leukste manier om je kind te leren sparen. Spaardoelen, uitdagingen en beloningen — alles op één plek. Gratis beginnen!">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --green: #1D9E75;
-      --green-light: #E1F5EE;
-      --green-dark: #085041;
-      --orange: #D85A30;
-      --orange-light: #FAECE7;
-      --amber: #EF9F27;
-      --amber-light: #FAEEDA;
-      --text: #1a1a1a;
-      --text-muted: #6b7280;
-      --border: rgba(0,0,0,0.1);
-      --bg: #FAFAF8;
-      --white: #ffffff;
-      --radius: 16px;
-      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+      --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #0A6B50;
+      --orange: #D85A30; --orange-light: #FAECE7;
+      --amber: #EF9F27; --amber-light: #FEF3DC;
+      --purple: #7F77DD; --purple-light: #EEEDFE;
+      --text: #16130E; --text-muted: #6E6A63;
+      --border: rgba(0,0,0,0.08);
+      --bg: #FAFAF7; --white: #ffffff;
+      --radius: 20px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-    body {
-      font-family: 'Nunito', sans-serif;
-      background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    /* ── ANIMATIONS ── */
+    @keyframes float    { 0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-14px) rotate(2deg)} }
+    @keyframes floatB   { 0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)} }
+    @keyframes spin     { to{transform:rotate(360deg)} }
+    @keyframes fadeUp   { from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)} }
+    @keyframes popIn    { from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)} }
+    @keyframes shimmer  { 0%{background-position:-200%}100%{background-position:200%} }
+    @keyframes wiggle   { 0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)} }
+    @keyframes countUp  { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+    @keyframes blob     { 0%,100%{border-radius:60% 40% 30% 70% / 60% 30% 70% 40%}50%{border-radius:30% 60% 70% 40% / 50% 60% 30% 60%} }
 
-    /* ── FLOATING SHAPES BACKGROUND ── */
-    .bg-shapes {
-      position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
-    }
-    .shape {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.07;
-    }
-    .shape-1 { width: 500px; height: 500px; background: var(--green); top: -150px; right: -100px; }
-    .shape-2 { width: 300px; height: 300px; background: var(--amber); bottom: 50px; left: -80px; }
-    .shape-3 { width: 200px; height: 200px; background: var(--orange); top: 40%; left: 60%; }
+    .fade-up { opacity: 0; animation: fadeUp 0.7s ease forwards; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
 
-    /* ── NAVBAR ── */
+    /* ── NAV ── */
     nav {
-      position: relative; z-index: 10;
+      position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 32px;
-      max-width: 1100px; margin: 0 auto; width: 100%;
+      padding: 16px 40px;
+      background: rgba(250,250,247,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
     }
-    .logo {
-      font-family: 'Baloo 2', sans-serif;
-      font-size: 26px; font-weight: 800;
-      color: var(--orange);
-      text-decoration: none;
-    }
-    .logo span { color: var(--green); }
-    .logo em { font-style: normal; font-size: 20px; }
+    .logo { font-family:'Baloo 2',sans-serif; font-size:26px; font-weight:800; color:var(--orange); text-decoration:none; }
+    .logo span { color:var(--green); }
+    .nav-links { display:flex; align-items:center; gap:8px; }
+    .nav-link { font-size:14px; font-weight:700; color:var(--text-muted); text-decoration:none; padding:8px 14px; border-radius:10px; transition:all 0.15s; }
+    .nav-link:hover { color:var(--text); background:rgba(0,0,0,0.04); }
+    .btn-nav { padding:10px 22px; border-radius:12px; font-family:'Nunito',sans-serif; font-size:14px; font-weight:800; cursor:pointer; border:none; transition:all 0.2s; }
+    .btn-nav-ghost { background:transparent; color:var(--text-muted); }
+    .btn-nav-ghost:hover { color:var(--text); }
+    .btn-nav-primary { background:var(--green); color:white; box-shadow:0 4px 12px rgba(29,158,117,0.3); }
+    .btn-nav-primary:hover { background:var(--green-dark); transform:translateY(-1px); box-shadow:0 6px 18px rgba(29,158,117,0.4); }
 
-    /* ── MAIN LAYOUT ── */
-    main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 20px 48px;
-      position: relative; z-index: 1;
-    }
-
-    .page-grid {
+    /* ── HERO ── */
+    .hero {
+      min-height: 92vh;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 64px;
       align-items: center;
-      max-width: 1000px;
-      width: 100%;
+      gap: 60px;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 60px 40px;
+      position: relative;
     }
 
-    /* ── LEFT: HERO ── */
-    .hero { padding: 0 16px; }
-    .hero-pig {
-      font-size: 72px;
-      display: block;
-      margin-bottom: 16px;
-      animation: float 3s ease-in-out infinite;
+    .hero-bg-blob {
+      position: absolute; width: 600px; height: 600px;
+      background: radial-gradient(ellipse, rgba(29,158,117,0.12) 0%, transparent 70%);
+      right: -100px; top: 50%; transform: translateY(-50%);
+      animation: blob 8s ease-in-out infinite;
+      pointer-events: none;
     }
-    @keyframes float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+    .hero-bg-blob-2 {
+      position: absolute; width: 300px; height: 300px;
+      background: radial-gradient(ellipse, rgba(239,159,39,0.1) 0%, transparent 70%);
+      left: -50px; bottom: 0;
+      pointer-events: none;
     }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--amber-light); border-radius: 20px;
+      padding: 6px 14px 6px 8px;
+      font-size: 13px; font-weight: 800; color: #6B3D00;
+      margin-bottom: 20px;
+      border: 1px solid rgba(239,159,39,0.25);
+    }
+    .badge-dot { width:8px; height:8px; border-radius:50%; background:var(--amber); animation:wiggle 1s ease-in-out infinite; }
+
     .hero h1 {
       font-family: 'Baloo 2', sans-serif;
-      font-size: 40px; font-weight: 800;
-      color: var(--text);
-      line-height: 1.15;
-      margin-bottom: 16px;
+      font-size: 58px; font-weight: 800; line-height: 1.1;
+      color: var(--text); margin-bottom: 20px;
     }
-    .hero h1 span { color: var(--green); }
-    .hero p {
-      font-size: 17px; color: var(--text-muted);
-      line-height: 1.7; margin-bottom: 28px;
-    }
-    .hero-features { display: flex; flex-direction: column; gap: 10px; }
-    .feat {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 14px; font-weight: 700; color: var(--text);
-    }
-    .feat-icon {
-      width: 32px; height: 32px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; flex-shrink: 0;
-    }
-    .feat-icon.g { background: var(--green-light); }
-    .feat-icon.a { background: var(--amber-light); }
-    .feat-icon.o { background: var(--orange-light); }
+    .hero h1 .green { color: var(--green); }
+    .hero h1 .orange { color: var(--orange); }
 
-    /* ── RIGHT: CARD ── */
-    .card {
-      background: var(--white);
-      border-radius: 24px;
-      padding: 36px 32px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
+    .hero-sub {
+      font-size: 18px; line-height: 1.7; color: var(--text-muted);
+      margin-bottom: 32px; max-width: 480px;
     }
 
-    /* ── TABS ── */
-    .tabs {
-      display: flex;
-      background: var(--bg);
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 28px;
+    .hero-cta { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 40px; }
+    .btn-hero-primary {
+      padding: 16px 32px; background: var(--green); color: white;
+      border-radius: 14px; font-family: 'Nunito', sans-serif;
+      font-size: 16px; font-weight: 800; border: none; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(29,158,117,0.35);
+      transition: all 0.2s; text-decoration: none; display: inline-block;
     }
-    .tab {
-      flex: 1; padding: 10px;
-      font-family: 'Nunito', sans-serif;
-      font-size: 14px; font-weight: 700;
-      border: none; background: transparent;
-      border-radius: 9px; cursor: pointer;
-      color: var(--text-muted);
-      transition: all 0.2s;
+    .btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(29,158,117,0.45); background:var(--green-dark); }
+    .btn-hero-secondary {
+      padding: 16px 24px; background: white; color: var(--text);
+      border-radius: 14px; font-family: 'Nunito', sans-serif;
+      font-size: 15px; font-weight: 700; border: 1.5px solid var(--border);
+      cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block;
     }
-    .tab.active {
-      background: var(--white);
-      color: var(--text);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
+    .btn-hero-secondary:hover { border-color: var(--green); color: var(--green); transform: translateY(-1px); }
 
-    /* ── FORM ── */
-    .form { display: none; }
-    .form.active { display: block; }
+    .hero-social-proof { display:flex; align-items:center; gap:16px; }
+    .avatars { display:flex; }
+    .avatar { width:36px; height:36px; border-radius:50%; border:2.5px solid white; font-size:18px; background:var(--green-light); display:flex; align-items:center; justify-content:center; margin-left:-10px; }
+    .avatar:first-child { margin-left:0; }
+    .proof-text { font-size:13px; color:var(--text-muted); font-weight:600; }
+    .proof-text strong { color:var(--text); }
+    .stars { color:var(--amber); font-size:14px; }
 
-    .form-title {
-      font-family: 'Baloo 2', sans-serif;
-      font-size: 22px; font-weight: 700;
-      color: var(--text); margin-bottom: 4px;
+    /* HERO VISUAL */
+    .hero-visual { position:relative; display:flex; align-items:center; justify-content:center; }
+    .hero-phone {
+      width: 300px; height: 560px;
+      background: white;
+      border-radius: 36px;
+      border: 8px solid var(--text);
+      box-shadow: 16px 16px 0 var(--text), 0 24px 80px rgba(0,0,0,0.15);
+      overflow: hidden; position: relative;
+      animation: floatB 4s ease-in-out infinite;
     }
-    .form-sub {
-      font-size: 13px; color: var(--text-muted);
-      margin-bottom: 24px;
-    }
+    .phone-notch { width:80px; height:22px; background:var(--text); border-radius:0 0 14px 14px; margin:0 auto; }
+    .phone-content { padding: 16px 16px; }
+    .phone-hero-bar { background:linear-gradient(135deg,var(--green),var(--green-dark)); border-radius:18px; padding:16px; margin-bottom:14px; text-align:center; }
+    .phone-pig { font-size:40px; animation:float 3s ease-in-out infinite; display:block; }
+    .phone-saldo { font-family:'Baloo 2',sans-serif; font-size:28px; font-weight:800; color:white; }
+    .phone-saldo-lbl { font-size:11px; color:rgba(255,255,255,0.75); }
+    .phone-goals { background:var(--bg); border-radius:14px; padding:12px; margin-bottom:10px; }
+    .phone-goal-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .phone-goal-emoji { font-size:20px; }
+    .phone-goal-info { flex:1; }
+    .phone-goal-name { font-size:11px; font-weight:700; }
+    .phone-goal-bar-wrap { height:5px; background:rgba(0,0,0,0.06); border-radius:3px; overflow:hidden; margin-top:3px; }
+    .phone-goal-bar { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--amber),var(--orange)); }
+    .phone-challenges { display:flex; flex-direction:column; gap:6px; }
+    .phone-ch { display:flex; align-items:center; gap:8px; background:white; border-radius:10px; padding:8px 10px; }
+    .phone-ch-dot { width:18px; height:18px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; }
+    .phone-ch-dot.done { background:var(--green); border-color:var(--green); display:flex; align-items:center; justify-content:center; color:white; font-size:10px; }
+    .phone-ch-text { font-size:11px; font-weight:700; flex:1; }
+    .phone-ch-reward { font-size:10px; font-weight:700; color:var(--amber); }
 
-    .field { margin-bottom: 16px; }
-    label {
-      display: block;
-      font-size: 13px; font-weight: 700;
-      color: var(--text); margin-bottom: 6px;
+    /* FLOATING BADGES */
+    .float-badge {
+      position:absolute; background:white; border-radius:16px;
+      padding:10px 14px; box-shadow:0 8px 32px rgba(0,0,0,0.12);
+      font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px;
+      border:1px solid var(--border); white-space:nowrap;
     }
-    input[type="text"], input[type="email"], input[type="password"] {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      font-family: 'Nunito', sans-serif;
-      font-size: 15px; color: var(--text);
-      background: var(--white);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    input:focus { border-color: var(--green); }
-    input::placeholder { color: #c0c0c0; }
+    .float-badge-1 { top:60px; left:-60px; animation:floatB 3.5s ease-in-out infinite; }
+    .float-badge-2 { bottom:120px; left:-80px; animation:floatB 4s ease-in-out infinite 0.5s; }
+    .float-badge-3 { top:100px; right:-60px; animation:floatB 3s ease-in-out infinite 1s; }
+    .float-badge-icon { font-size:22px; }
 
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    /* ── STATS BAR ── */
+    .stats-bar {
+      background: var(--text);
+      padding: 28px 40px;
+    }
+    .stats-inner {
+      max-width: 1000px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4,1fr);
+      text-align: center; gap: 20px;
+    }
+    .stat-item { padding: 12px; }
+    .stat-num { font-family:'Baloo 2',sans-serif; font-size:38px; font-weight:800; color:white; line-height:1; }
+    .stat-num .accent { color:var(--amber); }
+    .stat-lbl { font-size:13px; color:rgba(255,255,255,0.6); margin-top:4px; font-weight:600; }
 
-    .plan-pick { margin-bottom: 20px; }
-    .plan-pick label { margin-bottom: 10px; }
-    .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .plan {
-      border: 1.5px solid var(--border);
-      border-radius: 12px; padding: 12px;
-      cursor: pointer; transition: all 0.2s;
-      position: relative;
-    }
-    .plan:hover { border-color: var(--green); }
-    .plan.selected { border-color: var(--green); background: var(--green-light); }
-    .plan-name { font-size: 13px; font-weight: 800; color: var(--text); }
-    .plan-price { font-family: 'Baloo 2', sans-serif; font-size: 18px; font-weight: 700; color: var(--green); }
-    .plan-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .plan-badge {
-      position: absolute; top: -8px; right: 8px;
-      background: var(--orange); color: white;
-      font-size: 10px; font-weight: 800;
-      padding: 2px 8px; border-radius: 20px;
-    }
+    /* ── HOE WERKT HET ── */
+    .section { padding: 100px 40px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--green); margin-bottom:12px; }
+    .section-title { font-family:'Baloo 2',sans-serif; font-size:42px; font-weight:800; color:var(--text); margin-bottom:16px; line-height:1.2; }
+    .section-sub { font-size:17px; color:var(--text-muted); max-width:540px; line-height:1.7; }
 
-    .btn-main {
-      width: 100%; padding: 14px;
-      background: var(--green);
-      color: white; border: none;
-      border-radius: 14px;
-      font-family: 'Nunito', sans-serif;
-      font-size: 16px; font-weight: 800;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-top: 4px;
+    .steps-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; margin-top:56px; }
+    .step-card {
+      background:white; border-radius:24px; padding:32px;
+      border:1.5px solid var(--border); position:relative;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .btn-main:hover { background: var(--green-dark); transform: translateY(-1px); }
-    .btn-main:active { transform: translateY(0); }
+    .step-card:hover { transform:translateY(-6px); box-shadow:0 16px 48px rgba(0,0,0,0.08); }
+    .step-num {
+      position:absolute; top:-16px; left:28px;
+      font-family:'Baloo 2',sans-serif; font-size:13px; font-weight:800;
+      background:var(--green); color:white;
+      padding:4px 12px; border-radius:20px;
+    }
+    .step-emoji { font-size:48px; margin-bottom:16px; display:block; }
+    .step-title { font-family:'Baloo 2',sans-serif; font-size:22px; font-weight:700; margin-bottom:10px; }
+    .step-desc { font-size:14px; color:var(--text-muted); line-height:1.7; }
+    .step-arrow { position:absolute; top:50%; right:-22px; font-size:24px; transform:translateY(-50%); z-index:1; }
 
-    .divider {
-      text-align: center; margin: 16px 0;
-      color: var(--text-muted); font-size: 12px;
-      position: relative;
+    /* ── FEATURES ── */
+    .features-section { background: var(--green-light); padding: 100px 40px; }
+    .features-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:56px; max-width:1100px; margin-left:auto; margin-right:auto; }
+    .feature-card {
+      background:white; border-radius:22px; padding:28px;
+      border:1.5px solid rgba(29,158,117,0.15);
+      transition:transform 0.2s;
     }
-    .divider::before, .divider::after {
-      content: ''; position: absolute;
-      top: 50%; width: 40%; height: 1px;
-      background: var(--border);
-    }
-    .divider::before { left: 0; }
-    .divider::after { right: 0; }
+    .feature-card:hover { transform:translateY(-4px); }
+    .feature-card.big { grid-column:span 2; display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:center; }
+    .feat-icon { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:16px; }
+    .feat-title { font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px; }
+    .feat-desc { font-size:14px; color:var(--text-muted); line-height:1.7; }
+    .feat-list { list-style:none; margin-top:16px; display:flex; flex-direction:column; gap:8px; }
+    .feat-list li { display:flex; align-items:flex-start; gap:8px; font-size:14px; }
+    .feat-list li::before { content:'✓'; color:var(--green); font-weight:800; flex-shrink:0; }
 
-    .btn-google {
-      width: 100%; padding: 12px;
-      background: white; border: 1.5px solid var(--border);
-      border-radius: 14px;
-      font-family: 'Nunito', sans-serif;
-      font-size: 14px; font-weight: 700;
-      cursor: pointer; display: flex;
-      align-items: center; justify-content: center; gap: 8px;
-      color: var(--text); transition: background 0.2s;
+    /* APP SCREENSHOT in feature card */
+    .app-preview-mini {
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      border-radius: 18px; padding: 20px; color: white; text-align:center;
     }
-    .btn-google:hover { background: var(--bg); }
+    .app-preview-mini .pig { font-size: 48px; animation: float 3s ease-in-out infinite; }
+    .app-preview-mini .balance { font-family:'Baloo 2',sans-serif; font-size: 32px; font-weight: 800; }
+    .app-preview-mini .label { font-size: 12px; opacity: 0.75; }
+    .progress-row { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 12px; margin-top: 12px; text-align: left; }
+    .progress-label { font-size: 11px; opacity: 0.8; margin-bottom: 6px; font-weight:700; }
+    .progress-bar-wrap { background: rgba(255,255,255,0.2); height: 6px; border-radius: 3px; }
+    .progress-bar-fill { height: 100%; background: var(--amber); border-radius: 3px; width: 62%; }
 
-    .terms {
-      font-size: 11px; color: var(--text-muted);
-      text-align: center; margin-top: 14px;
-      line-height: 1.6;
+    /* ── TESTIMONIALS ── */
+    .testimonials-section { padding: 100px 40px; }
+    .testimonials-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:56px; }
+    .testimonial-card {
+      background:white; border-radius:22px; padding:28px;
+      border:1.5px solid var(--border);
+      transition:transform 0.2s;
     }
-    .terms a { color: var(--green); text-decoration: none; font-weight: 700; }
+    .testimonial-card:hover { transform:translateY(-4px); }
+    .testimonial-stars { color:var(--amber); font-size:16px; margin-bottom:14px; }
+    .testimonial-text { font-size:15px; line-height:1.7; color:var(--text); margin-bottom:20px; font-style:italic; }
+    .testimonial-author { display:flex; align-items:center; gap:10px; }
+    .testimonial-avatar { width:42px; height:42px; border-radius:50%; background:var(--green-light); display:flex; align-items:center; justify-content:center; font-size:22px; }
+    .testimonial-name { font-size:14px; font-weight:700; }
+    .testimonial-meta { font-size:12px; color:var(--text-muted); }
 
-    .forgot {
-      text-align: right; margin-bottom: 16px;
-      font-size: 12px; font-weight: 700;
+    /* ── PRICING ── */
+    .pricing-section { background: var(--bg); padding: 100px 40px; }
+    .pricing-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:56px; max-width:900px; margin-left:auto; margin-right:auto; }
+    .pricing-card {
+      background:white; border-radius:24px; padding:28px;
+      border:1.5px solid var(--border); text-align:center;
+      transition:all 0.2s;
     }
-    .forgot a { color: var(--green); text-decoration: none; }
+    .pricing-card:hover { transform:translateY(-4px); }
+    .pricing-card.featured { border-color:var(--green); border-width:2px; transform:scale(1.03); }
+    .pricing-card.featured:hover { transform:scale(1.03) translateY(-4px); }
+    .pricing-featured-badge { background:var(--green); color:white; font-size:11px; font-weight:800; padding:4px 14px; border-radius:20px; display:inline-block; margin-bottom:16px; }
+    .pricing-icon { font-size:36px; margin-bottom:12px; display:block; }
+    .pricing-name { font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:700; margin-bottom:4px; }
+    .pricing-tagline { font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+    .pricing-price { font-family:'Baloo 2',sans-serif; font-size:44px; font-weight:800; line-height:1; }
+    .pricing-price sup { font-size:20px; vertical-align:top; margin-top:8px; }
+    .pricing-price sub { font-size:14px; color:var(--text-muted); font-weight:600; }
+    .pricing-features-list { list-style:none; margin:20px 0; text-align:left; display:flex; flex-direction:column; gap:8px; }
+    .pricing-features-list li { display:flex; align-items:flex-start; gap:8px; font-size:13px; }
+    .p-check { color:var(--green); font-weight:800; }
+    .p-cross { color:#DDD; }
+    .btn-pricing {
+      width:100%; padding:13px; border-radius:13px;
+      font-family:'Nunito',sans-serif; font-size:14px; font-weight:800;
+      cursor:pointer; border:none; transition:all 0.2s;
+    }
+    .btn-p-green { background:var(--green); color:white; }
+    .btn-p-green:hover { background:var(--green-dark); }
+    .btn-p-outline { background:transparent; color:var(--text); border:1.5px solid var(--border); }
+    .btn-p-outline:hover { border-color:var(--green); color:var(--green); }
 
-    /* ── SUCCESS STATE ── */
-    .success-state {
-      display: none; text-align: center; padding: 20px 0;
+    /* ── FINAL CTA ── */
+    .final-cta {
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%);
+      padding: 100px 40px; text-align: center; position: relative; overflow: hidden;
     }
-    .success-state.show { display: block; }
-    .success-icon { font-size: 56px; margin-bottom: 12px; }
-    .success-state h3 {
-      font-family: 'Baloo 2', sans-serif;
-      font-size: 22px; font-weight: 700;
-      color: var(--text); margin-bottom: 8px;
+    .final-cta::before {
+      content: '🐷'; position: absolute; font-size: 200px; opacity: 0.06;
+      top: -40px; right: -20px; animation: float 4s ease-in-out infinite;
     }
-    .success-state p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .final-cta h2 { font-family:'Baloo 2',sans-serif; font-size:46px; font-weight:800; color:white; margin-bottom:16px; }
+    .final-cta p { font-size:18px; color:rgba(255,255,255,0.8); margin-bottom:36px; max-width:520px; margin-left:auto; margin-right:auto; line-height:1.7; }
+    .btn-final {
+      display:inline-block; padding:18px 42px;
+      background:white; color:var(--green-dark);
+      border-radius:14px; font-family:'Nunito',sans-serif;
+      font-size:17px; font-weight:800; text-decoration:none;
+      box-shadow:0 8px 28px rgba(0,0,0,0.2);
+      transition:all 0.2s; border:none; cursor:pointer;
+    }
+    .btn-final:hover { transform:translateY(-3px) scale(1.02); box-shadow:0 12px 36px rgba(0,0,0,0.25); }
+    .final-note { font-size:13px; color:rgba(255,255,255,0.6); margin-top:14px; }
 
-    /* ── SOCIAL PROOF ── */
-    .social-proof {
-      display: flex; align-items: center; gap: 10px;
-      margin-top: 24px;
-      padding: 12px 16px;
-      background: var(--green-light);
-      border-radius: 12px;
+    /* ── FOOTER ── */
+    footer {
+      background: var(--text); padding: 48px 40px; color: rgba(255,255,255,0.5);
     }
-    .avatars { display: flex; }
-    .av {
-      width: 28px; height: 28px; border-radius: 50%;
-      border: 2px solid white;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700;
-      margin-left: -6px;
-    }
-    .av:first-child { margin-left: 0; }
-    .av-1 { background: #FAC775; color: #412402; }
-    .av-2 { background: #AFA9EC; color: #26215C; }
-    .av-3 { background: #F0997B; color: #4A1B0C; }
-    .av-4 { background: #85B7EB; color: #042C53; }
-    .sp-text { font-size: 12px; font-weight: 700; color: var(--green-dark); }
-    .sp-text span { color: var(--text-muted); font-weight: 400; }
+    .footer-inner { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; }
+    .footer-logo { font-family:'Baloo 2',sans-serif; font-size:22px; font-weight:800; color:var(--orange); }
+    .footer-logo span { color:var(--green); }
+    .footer-links { display:flex; gap:20px; }
+    .footer-links a { font-size:13px; color:rgba(255,255,255,0.4); text-decoration:none; transition:color 0.15s; }
+    .footer-links a:hover { color:white; }
+    .footer-copy { font-size:12px; }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      .page-grid { grid-template-columns: 1fr; gap: 32px; }
-      .hero { display: none; }
-      nav { padding: 16px 20px; }
-      main { padding: 12px 16px 40px; align-items: flex-start; }
-      .card { padding: 28px 20px; }
+    @media (max-width:900px) {
+      .hero { grid-template-columns:1fr; text-align:center; padding:40px 20px; gap:40px; min-height:auto; }
+      .hero h1 { font-size:40px; }
+      .hero-sub { margin: 0 auto 28px; }
+      .hero-cta { justify-content:center; }
+      .hero-social-proof { justify-content:center; }
+      .hero-visual { display:none; }
+      .stats-inner { grid-template-columns:repeat(2,1fr); }
+      .steps-grid { grid-template-columns:1fr; }
+      .step-arrow { display:none; }
+      .features-grid { grid-template-columns:1fr; }
+      .feature-card.big { grid-column:1; grid-template-columns:1fr; }
+      .testimonials-grid { grid-template-columns:1fr; }
+      .pricing-cards { grid-template-columns:1fr; max-width:400px; }
+      .pricing-card.featured { transform:none; }
+      nav { padding:14px 20px; }
+      .nav-links { display:none; }
+      .section { padding:60px 20px; }
+      .features-section { padding:60px 20px; }
+      .testimonials-section { padding:60px 20px; }
+      .pricing-section { padding:60px 20px; }
+      .final-cta { padding:60px 20px; }
+      .final-cta h2 { font-size:32px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="bg-shapes">
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Kind<span>geld</span></a>
+  <div class="nav-links">
+    <a href="#hoe-werkt-het" class="nav-link">Hoe werkt het</a>
+    <a href="#functies" class="nav-link">Functies</a>
+    <a href="#prijzen" class="nav-link">Prijzen</a>
+    <button class="btn-nav btn-nav-ghost" onclick="window.location.href='index.html'">Inloggen</button>
+    <a href="index.html" class="btn-nav btn-nav-primary">Gratis beginnen →</a>
   </div>
+  <a href="index.html" class="btn-nav btn-nav-primary" style="display:none" id="mobile-cta">Gratis starten</a>
+</nav>
 
-  <nav>
-    <a href="/" class="logo">Kind<span>geld</span></a>
-  </nav>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-blob"></div>
+  <div class="hero-bg-blob-2"></div>
 
-  <main>
-    <div class="page-grid">
-
-      <!-- LEFT: HERO -->
-      <div class="hero">
-        <span class="hero-pig">🐷</span>
-        <h1>Leer je kind <span>slim sparen</span> en doelen bereiken</h1>
-        <p>Kindgeld maakt sparen leuk voor kinderen van 4 tot 14 jaar — met uitdagingen, beloningen en oudercontrole.</p>
-        <div class="hero-features">
-          <div class="feat"><div class="feat-icon g">🎯</div>Spaardoelen instellen & bijhouden</div>
-          <div class="feat"><div class="feat-icon a">🏆</div>Wekelijkse uitdagingen met munten verdienen</div>
-          <div class="feat"><div class="feat-icon o">👨‍👩‍👦</div>Ouderportaal met volledige controle</div>
-        </div>
-        <div class="social-proof">
-          <div class="avatars">
-            <div class="av av-1">S</div>
-            <div class="av av-2">M</div>
-            <div class="av av-3">J</div>
-            <div class="av av-4">R</div>
-          </div>
-          <div class="sp-text">Al 2.400+ gezinnen gestart <span>— gratis beginnen!</span></div>
-        </div>
+  <div class="hero-left">
+    <div class="hero-badge fade-up">
+      <span class="badge-dot"></span>
+      🎉 Al 2.400+ gezinnen gaan je voor
+    </div>
+    <h1 class="fade-up delay-1">
+      Leer je kind<br>
+      <span class="green">slim sparen</span><br>
+      <span class="orange">op een leuke manier</span>
+    </h1>
+    <p class="hero-sub fade-up delay-2">
+      Kindgeld maakt sparen leuk met spaardoelen, uitdagingen en beloningen. Jij behoudt de controle, je kind leert financieel verantwoordelijk zijn.
+    </p>
+    <div class="hero-cta fade-up delay-3">
+      <a href="index.html" class="btn-hero-primary">🐷 Gratis beginnen</a>
+      <a href="#hoe-werkt-het" class="btn-hero-secondary">Hoe werkt het? →</a>
+    </div>
+    <div class="hero-social-proof fade-up delay-4">
+      <div class="avatars">
+        <div class="avatar">👩</div>
+        <div class="avatar">👨</div>
+        <div class="avatar">👩</div>
+        <div class="avatar">👨</div>
       </div>
-
-      <!-- RIGHT: AUTH CARD -->
-      <div class="card">
-
-        <div class="tabs">
-          <button class="tab active" onclick="switchTab('register')">Account aanmaken</button>
-          <button class="tab" onclick="switchTab('login')">Inloggen</button>
-        </div>
-
-        <!-- REGISTER FORM -->
-        <div class="form active" id="form-register">
-          <div class="form-title">Gratis starten 🎉</div>
-          <div class="form-sub">Eerste maand gratis — daarna €4,95/maand</div>
-
-          <div class="field-row">
-            <div class="field">
-              <label>Jouw voornaam</label>
-              <input type="text" placeholder="Sara">
-            </div>
-            <div class="field">
-              <label>Achternaam</label>
-              <input type="text" placeholder="de Vries">
-            </div>
-          </div>
-
-          <div class="field">
-            <label>E-mailadres</label>
-            <input type="email" placeholder="sara@email.nl">
-          </div>
-
-          <div class="field">
-            <label>Wachtwoord</label>
-            <input type="password" placeholder="Minimaal 8 tekens">
-          </div>
-
-          <div class="plan-pick">
-            <label>Kies je abonnement</label>
-            <div class="plans">
-              <div class="plan" onclick="selectPlan(this)">
-                <div class="plan-name">Gratis</div>
-                <div class="plan-price">€0</div>
-                <div class="plan-desc">1 kind · basis functies</div>
-              </div>
-              <div class="plan selected" onclick="selectPlan(this)">
-                <div class="plan-badge">Populairste</div>
-                <div class="plan-name">Gezin</div>
-                <div class="plan-price">€4,95<small style="font-size:12px;color:#888">/mnd</small></div>
-                <div class="plan-desc">Tot 4 kinderen · alles</div>
-              </div>
-            </div>
-          </div>
-
-          <button class="btn-main" onclick="handleRegister()">Account aanmaken →</button>
-
-          <div class="divider">of</div>
-          <button class="btn-google" onclick="handleRegister()">
-            <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
-            Doorgaan met Google
-          </button>
-
-          <p class="terms">Door te registreren ga je akkoord met onze <a href="#">voorwaarden</a> en <a href="#">privacybeleid</a>. Je kunt altijd opzeggen.</p>
-        </div>
-
-        <!-- LOGIN FORM -->
-        <div class="form" id="form-login">
-          <div class="form-title">Welkom terug! 👋</div>
-          <div class="form-sub">Log in op jouw Kindgeld account</div>
-
-          <div class="field">
-            <label>E-mailadres</label>
-            <input type="email" placeholder="sara@email.nl">
-          </div>
-
-          <div class="field">
-            <label>Wachtwoord</label>
-            <input type="password" placeholder="Jouw wachtwoord">
-          </div>
-
-          <div class="forgot"><a href="#">Wachtwoord vergeten?</a></div>
-
-          <button class="btn-main" onclick="handleLogin()">Inloggen →</button>
-
-          <div class="divider">of</div>
-          <button class="btn-google" onclick="handleLogin()">
-            <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
-            Doorgaan met Google
-          </button>
-        </div>
-
-        <!-- SUCCESS STATE -->
-        <div class="success-state" id="success">
-          <div class="success-icon">🎉</div>
-          <h3>Welkom bij Kindgeld!</h3>
-          <p>Je account is aangemaakt. We sturen je een bevestigingsmail naar je e-mailadres. Daarna kun je meteen je eerste kindprofiel aanmaken!</p>
-          <button class="btn-main" style="margin-top:20px" onclick="window.location.href='dashboard.html'">Start met instellen →</button>
-        </div>
-
+      <div class="proof-text">
+        <div class="stars">★★★★★</div>
+        <strong>2.400+ ouders</strong> geven hun kind een vliegende start
       </div>
     </div>
-  </main>
+  </div>
 
-  <script>
-    function switchTab(tab) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
-      document.getElementById('success').classList.remove('show');
-      if (tab === 'register') {
-        document.querySelectorAll('.tab')[0].classList.add('active');
-        document.getElementById('form-register').classList.add('active');
-      } else {
-        document.querySelectorAll('.tab')[1].classList.add('active');
-        document.getElementById('form-login').classList.add('active');
+  <!-- PHONE MOCKUP -->
+  <div class="hero-visual fade-up delay-2">
+    <div class="float-badge float-badge-1">
+      <span class="float-badge-icon">🔥</span>
+      <div><div style="font-size:11px;color:#999">Streak</div><strong>7 dagen op rij!</strong></div>
+    </div>
+    <div class="float-badge float-badge-2">
+      <span class="float-badge-icon">🎯</span>
+      <div><div style="font-size:11px;color:#999">Spaardoel</div><strong>62% behaald!</strong></div>
+    </div>
+    <div class="float-badge float-badge-3">
+      <span class="float-badge-icon">🪙</span>
+      <div><div style="font-size:11px;color:#999">Verdiend</div><strong>+🪙12 vandaag</strong></div>
+    </div>
+
+    <div class="hero-phone">
+      <div class="phone-notch"></div>
+      <div class="phone-content">
+        <div class="phone-hero-bar">
+          <span class="phone-pig">🐷</span>
+          <div class="phone-saldo">€ 12,50</div>
+          <div class="phone-saldo-lbl">Emma's spaarpot</div>
+        </div>
+        <div class="phone-goals">
+          <div style="font-size:10px;font-weight:800;margin-bottom:8px;color:#999">SPAARDOELEN</div>
+          <div class="phone-goal-row">
+            <span class="phone-goal-emoji">🎮</span>
+            <div class="phone-goal-info">
+              <div class="phone-goal-name">Nintendo Switch</div>
+              <div class="phone-goal-bar-wrap"><div class="phone-goal-bar" style="width:62%"></div></div>
+            </div>
+            <span style="font-size:11px;font-weight:800;color:var(--amber)">62%</span>
+          </div>
+        </div>
+        <div class="phone-challenges">
+          <div style="font-size:10px;font-weight:800;color:#999;padding:0 2px;margin-bottom:2px">UITDAGINGEN</div>
+          <div class="phone-ch">
+            <div class="phone-ch-dot done">✓</div>
+            <span class="phone-ch-text">🦷 Tanden poetsen</span>
+            <span class="phone-ch-reward">+🪙6</span>
+          </div>
+          <div class="phone-ch">
+            <div class="phone-ch-dot"></div>
+            <span class="phone-ch-text">🛏️ Kamer opruimen</span>
+            <span class="phone-ch-reward">+🪙5</span>
+          </div>
+          <div class="phone-ch">
+            <div class="phone-ch-dot"></div>
+            <span class="phone-ch-text">📚 Huiswerk af</span>
+            <span class="phone-ch-reward">+🪙10</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num"><span class="accent">2.400</span>+</div>
+      <div class="stat-lbl">Actieve gezinnen</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="accent">€</span>48K+</div>
+      <div class="stat-lbl">Gespaard door kinderen</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="accent">4,9</span>⭐</div>
+      <div class="stat-lbl">Gemiddelde beoordeling</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="accent">0</span> €</div>
+      <div class="stat-lbl">Om te beginnen</div>
+    </div>
+  </div>
+</div>
+
+<!-- HOE WERKT HET -->
+<section class="section" id="hoe-werkt-het">
+  <div class="section-inner">
+    <div class="section-label">Hoe werkt het</div>
+    <h2 class="section-title">In 3 stappen van start 🚀</h2>
+    <p class="section-sub">Account aanmaken, kind toevoegen, en je kind is meteen gemotiveerd om te sparen. Geen gedoe.</p>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">Stap 1</div>
+        <span class="step-emoji">👋</span>
+        <div class="step-title">Maak een account</div>
+        <div class="step-desc">In 60 seconden aangemeld. Gratis, geen creditcard nodig. Gewoon je naam, e-mail en klaar.</div>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Stap 2</div>
+        <span class="step-emoji">🐱</span>
+        <div class="step-title">Voeg je kind toe</div>
+        <div class="step-desc">Kies een avatar, stel een spaardoel in en maak de eerste uitdaging aan. Je kind is meteen enthousiast.</div>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Stap 3</div>
+        <span class="step-emoji">🎯</span>
+        <div class="step-title">Sparen maar!</div>
+        <div class="step-desc">Je kind verdient munten door uitdagingen te doen, spaart voor doelen en wisselt beloningen in. Jij keurt alles goed.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="functies">
+  <div class="section-inner" style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Functies</div>
+    <h2 class="section-title">Alles wat een slim spaarkind nodig heeft</h2>
+    <p class="section-sub">Van spaardoelen tot beloningenwinkel — Kindgeld heeft het allemaal. En jij blijft altijd de baas.</p>
+
+    <div class="features-grid">
+      <!-- BIG CARD -->
+      <div class="feature-card big">
+        <div>
+          <div class="feat-icon" style="background:var(--amber-light)">🎯</div>
+          <div class="feat-title">Spaardoelen die motiveren</div>
+          <div class="feat-desc">Je kind kiest een doel — een nieuwe fiets, een game, of een uitje. De voortgangsbalk zorgt dat ze elke dag gemotiveerd blijven.</div>
+          <ul class="feat-list">
+            <li>Onbeperkt doelen instellen</li>
+            <li>Live voortgang bijhouden</li>
+            <li>Automatisch doorrekenen wanneer het doel bereikt is</li>
+            <li>Confetti als het doel bereikt is 🎉</li>
+          </ul>
+        </div>
+        <div class="app-preview-mini">
+          <div class="pig">🐷</div>
+          <div class="balance">€ 12,50</div>
+          <div class="label">Spaarpot Emma</div>
+          <div class="progress-row">
+            <div class="progress-label">🎮 Nintendo Switch — 62%</div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feat-icon" style="background:#FFF0E5">⚡</div>
+        <div class="feat-title">Wekelijkse uitdagingen</div>
+        <div class="feat-desc">Maak uitdagingen als "tanden poetsen", "kamer opruimen" of "huiswerk af". Je kind verdient munten en zakgeld. Jij bepaalt de beloning.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feat-icon" style="background:var(--purple-light)">🏆</div>
+        <div class="feat-title">Beloningenwinkel</div>
+        <div class="feat-desc">Je kind koopt beloningen met verdiende munten — maar jij geeft altijd goedkeuring. Extra schermtijd? Ijsje? Jij beslist.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feat-icon" style="background:var(--green-light)">👨‍👩‍👦</div>
+        <div class="feat-title">Ouderportaal</div>
+        <div class="feat-desc">Alle kinderen op één scherm. Saldo bijstorten, uitdagingen aanmaken, goedkeuringen beheren en transacties bekijken — alles op één plek.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feat-icon" style="background:#FEF2F2">🔥</div>
+        <div class="feat-title">Streak & badges</div>
+        <div class="feat-desc">Je kind bouwt een streak op door elke dag bezig te zijn. Badges verdienen ze voor mijlpalen. Gamification die echt werkt.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+  <div class="section-inner">
+    <div class="section-label">Wat ouders zeggen</div>
+    <h2 class="section-title">Ouders én kinderen zijn fan ❤️</h2>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Mijn dochter van 8 ruimt nu spontaan haar kamer op. Ze wil munten verdienen voor haar spaardoel. Ongelooflijk wat een verschil dit maakt!"</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👩</div>
+          <div>
+            <div class="testimonial-name">Lisa van der Berg</div>
+            <div class="testimonial-meta">Moeder van Emma (8) · Amsterdam</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Eindelijk een app die mijn zoons begrijpen én waar ik controle over heb. Ze sparen nu al 3 maanden voor een Nintendo Switch. Zo trots!"</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👨</div>
+          <div>
+            <div class="testimonial-name">Martijn de Groot</div>
+            <div class="testimonial-meta">Vader van Tim (11) · Utrecht</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"We gebruiken het al voor 3 kinderen. De uitdagingen maken het huishouden zoveel makkelijker. En de kinderen leren tegelijk omgaan met geld!"</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👩</div>
+          <div>
+            <div class="testimonial-name">Sandra Jansen</div>
+            <div class="testimonial-meta">Moeder van 3 kinderen · Rotterdam</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="prijzen">
+  <div class="section-inner">
+    <div class="section-label">Prijzen</div>
+    <h2 class="section-title">Begin gratis, upgrade wanneer je wilt</h2>
+    <p class="section-sub">Geen verplichtingen. Geen verborgen kosten. Altijd opzegbaar.</p>
+
+    <div class="pricing-cards">
+      <div class="pricing-card">
+        <span class="pricing-icon">🌱</span>
+        <div class="pricing-name">Gratis</div>
+        <div class="pricing-tagline">Kennismaken</div>
+        <div class="pricing-price"><sup>€</sup>0</div>
+        <ul class="pricing-features-list">
+          <li><span class="p-check">✓</span> 1 kind</li>
+          <li><span class="p-check">✓</span> 1 spaardoel</li>
+          <li><span class="p-check">✓</span> Basis uitdagingen</li>
+          <li><span class="p-cross">✗</span> <span style="color:#bbb">Meerdere kinderen</span></li>
+          <li><span class="p-cross">✗</span> <span style="color:#bbb">Beloningenwinkel</span></li>
+        </ul>
+        <button class="btn-pricing btn-p-outline" onclick="window.location.href='index.html'">Gratis beginnen</button>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-featured-badge">⭐ Meest gekozen</div>
+        <span class="pricing-icon">🏠</span>
+        <div class="pricing-name">Gezin</div>
+        <div class="pricing-tagline">Voor het hele gezin</div>
+        <div class="pricing-price"><sup>€</sup>4<sub>,95/mnd</sub></div>
+        <ul class="pricing-features-list">
+          <li><span class="p-check">✓</span> Tot 4 kinderen</li>
+          <li><span class="p-check">✓</span> Onbeperkt doelen</li>
+          <li><span class="p-check">✓</span> Beloningenwinkel</li>
+          <li><span class="p-check">✓</span> Automatisch zakgeld</li>
+          <li><span class="p-check">✓</span> Eerste maand gratis</li>
+        </ul>
+        <button class="btn-pricing btn-p-green" onclick="window.location.href='abonnement.html'">Starten — gratis proberen</button>
+      </div>
+
+      <div class="pricing-card">
+        <span class="pricing-icon">🚀</span>
+        <div class="pricing-name">Jaar</div>
+        <div class="pricing-tagline">Beste prijs</div>
+        <div class="pricing-price"><sup>€</sup>39<sub>/jaar</sub></div>
+        <ul class="pricing-features-list">
+          <li><span class="p-check">✓</span> Alles uit Gezin</li>
+          <li><span class="p-check">✓</span> Tot 6 kinderen</li>
+          <li><span class="p-check">✓</span> Bespaar €20</li>
+          <li><span class="p-check">✓</span> Prioriteit support</li>
+          <li><span class="p-check">✓</span> 30 dagen garantie</li>
+        </ul>
+        <button class="btn-pricing btn-p-outline" onclick="window.location.href='abonnement.html'" style="border-color:var(--green);color:var(--green)">Jaarplan kiezen</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <h2>Klaar om te beginnen? 🐷</h2>
+  <p>Gratis account aanmaken duurt 60 seconden. Je kind heeft vandaag nog zijn eerste spaardoel.</p>
+  <a href="index.html" class="btn-final">Gratis beginnen →</a>
+  <div class="final-note">Geen creditcard nodig · Altijd opzegbaar · 2.400+ gezinnen gingen je voor</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Kind<span>geld</span></div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Voorwaarden</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="footer-copy">© 2025 Kindgeld · Jannik Dienstverlening</div>
+  </div>
+</footer>
+
+<script>
+  // Show mobile CTA
+  if (window.innerWidth < 900) {
+    document.getElementById('mobile-cta').style.display = 'block';
+  }
+
+  // Intersection Observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
       }
-    }
+    });
+  }, { threshold: 0.1 });
 
-    function selectPlan(el) {
-      document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
-      el.classList.add('selected');
-    }
+  document.querySelectorAll('.step-card, .feature-card, .testimonial-card, .pricing-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+</script>
 
-    function handleRegister() {
-      document.getElementById('form-register').style.display = 'none';
-      document.querySelectorAll('.tabs')[0].style.display = 'none';
-      document.getElementById('success').classList.add('show');
-    }
-
-    function handleLogin() {
-      document.getElementById('form-login').style.display = 'none';
-      document.querySelectorAll('.tabs')[0].style.display = 'none';
-      document.getElementById('success').classList.add('show');
-    }
-  </script>
 </body>
 </html>
