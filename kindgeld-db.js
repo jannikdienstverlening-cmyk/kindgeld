@@ -5,8 +5,8 @@
 
 // ── CONFIG ── VERVANG MET JOUW SUPABASE WAARDEN ─────────────
 // Vind je op: supabase.com → jouw project → Settings → API
-const SUPABASE_URL  = 'https://JOUW_PROJECT_ID.supabase.co';
-const SUPABASE_KEY  = 'JOUW_ANON_PUBLIC_KEY';
+const SUPABASE_URL  = 'https://kindgeld.supabase.co';
+const SUPABASE_KEY  = 'ysdwxbwfbayygujlshxi';
 // ────────────────────────────────────────────────────────────
 
 // Laad Supabase client (via CDN, geen installatie nodig)
