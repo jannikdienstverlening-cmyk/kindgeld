@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kindgeld — Kindscherm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #085041;
+      --orange: #D85A30; --orange-light: #FAECE7;
+      --amber: #EF9F27; --amber-light: #FAEEDA;
+      --purple: #7F77DD; --purple-light: #EEEDFE;
+      --pink: #E8549A; --pink-light: #FCE4F0;
+      --blue: #378ADD; --blue-light: #E6F1FB;
+      --red: #E24B4A; --red-light: #FCEBEB;
+      --text: #1a1a1a; --text-muted: #6b7280;
+      --border: rgba(0,0,0,0.08); --bg: #F5F4F0; --white: #fff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100vh; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(160deg, #064535 0%, #0A6B50 30%, #1D9E75 65%, #2EC98A 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes float    { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-14px) rotate(2deg)} }
+    @keyframes floatB   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes popIn    { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+    @keyframes slideUp  { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes bounce   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+    @keyframes shake    { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    @keyframes spin     { to{transform:rotate(360deg)} }
+    @keyframes confetti { 0%{transform:translateY(0) rotate(0)} 100%{transform:translateY(-120px) rotate(360deg);opacity:0} }
+    @keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    @keyframes fillBar  { from{width:0} to{width:var(--fill)} }
+    @keyframes tada     { 0%{transform:scale(1)} 20%{transform:scale(0.9) rotate(-3deg)} 40%{transform:scale(1.2) rotate(3deg)} 60%{transform:scale(1.1) rotate(-2deg)} 80%{transform:scale(1.05) rotate(1deg)} 100%{transform:scale(1)} }
+
+    /* ── LOADING ── */
+    .loading-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; color: white; gap: 16px;
+    }
+    .loading-pig { font-size: 72px; animation: float 2s ease-in-out infinite; }
+    .loading-text { font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800; opacity: 0.9; }
+    .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+    /* ── MAIN LAYOUT ── */
+    .kindscherm { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px 0;
+      position: relative; z-index: 10;
+    }
+    .topbar-logo {
+      font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800;
+      color: rgba(255,255,255,0.9);
+    }
+    .topbar-logo span { color: var(--amber); }
+    .btn-ouder {
+      background: rgba(0,0,0,0.25);
+      border: 1.5px solid rgba(255,255,255,0.3);
+      border-radius: 12px; padding: 8px 16px;
+      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+      color: rgba(255,255,255,0.85); cursor: pointer;
+      transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-ouder:hover { background: rgba(0,0,0,0.4); color: white; }
+
+    /* ── KIND SELECTOR ── */
+    .kind-selector {
+      display: flex; gap: 8px; padding: 14px 20px 0;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .kind-selector::-webkit-scrollbar { display: none; }
+    .kind-chip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 20px;
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.25);
+      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+      color: rgba(255,255,255,0.8); cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .kind-chip.actief {
+      background: rgba(255,255,255,0.28);
+      border-color: rgba(255,255,255,0.7);
+      color: white;
+    }
+
+    /* ── HERO ── */
+    .hero-sectie {
+      text-align: center;
+      padding: 20px 20px 8px;
+      animation: slideUp 0.5s ease;
+    }
+    .avatar-groot { font-size: 88px; display: block; animation: float 3s ease-in-out infinite; }
+    .kind-naam {
+      font-family: 'Baloo 2', sans-serif; font-size: 32px; font-weight: 800;
+      color: white; margin-top: 4px; line-height: 1.1;
+    }
+    .groet-tekst {
+      font-size: 16px; color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 2px;
+    }
+
+    /* ── SALDO KAART ── */
+    .saldo-kaart {
+      margin: 16px 16px 0;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(16px);
+      border-radius: 28px;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      padding: 24px;
+      text-align: center;
+      animation: slideUp 0.5s ease 0.1s both;
+    }
+    .saldo-label {
+      font-size: 13px; font-weight: 700;
+      color: rgba(255,255,255,0.75); text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 6px;
+    }
+    .saldo-bedrag {
+      font-family: 'Baloo 2', sans-serif; font-size: 64px; font-weight: 800;
+      color: white; line-height: 1;
+    }
+    .saldo-subtekst {
+      font-size: 14px; color: rgba(255,255,255,0.65); margin-top: 6px; font-weight: 600;
+    }
+
+    /* ── STATS RIJ ── */
+    .stats-rij {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; padding: 12px 16px 0;
+      animation: slideUp 0.5s ease 0.2s both;
+    }
+    .stat-chip {
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 18px; padding: 14px 10px;
+      text-align: center;
+    }
+    .stat-chip-icon { font-size: 22px; margin-bottom: 4px; display: block; }
+    .stat-chip-val {
+      font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800;
+      color: white; line-height: 1;
+    }
+    .stat-chip-lbl { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; font-weight: 700; }
+
+    /* ── ONDERPANEEL ── */
+    .onderpaneel {
+      background: var(--bg);
+      border-radius: 32px 32px 0 0;
+      margin-top: 20px;
+      padding: 28px 16px 40px;
+      flex: 1;
+      animation: slideUp 0.6s ease 0.2s both;
+    }
+
+    /* ── SECTIE HEADER ── */
+    .sectie-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .sectie-titel {
+      font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800;
+      color: var(--text); display: flex; align-items: center; gap: 8px;
+    }
+    .sectie-teller {
+      font-size: 12px; font-weight: 700;
+      background: var(--green-light); color: var(--green-dark);
+      padding: 3px 10px; border-radius: 20px;
+    }
+
+    /* ── SPAARDOELEN ── */
+    .spaardoel-kaart {
+      background: white; border-radius: 20px;
+      border: 1.5px solid var(--border);
+      padding: 18px; margin-bottom: 12px;
+      transition: transform 0.2s;
+    }
+    .spaardoel-kaart:active { transform: scale(0.98); }
+    .spaardoel-top {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .spaardoel-emoji-wrap {
+      width: 52px; height: 52px; border-radius: 16px;
+      background: var(--amber-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; flex-shrink: 0;
+    }
+    .spaardoel-info { flex: 1; }
+    .spaardoel-naam {
+      font-family: 'Baloo 2', sans-serif; font-size: 18px; font-weight: 800; color: var(--text);
+    }
+    .spaardoel-bedragen {
+      font-size: 13px; color: var(--text-muted); margin-top: 2px; font-weight: 700;
+    }
+    .spaardoel-pct {
+      font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800;
+      color: var(--amber); flex-shrink: 0;
+    }
+    .spaardoel-pct.bereikt { color: var(--green); }
+    .voortgangs-balk-wrap {
+      height: 14px; background: rgba(0,0,0,0.06);
+      border-radius: 7px; overflow: hidden;
+    }
+    .voortgangs-balk {
+      height: 100%; border-radius: 7px;
+      background: linear-gradient(90deg, var(--amber), var(--orange));
+      transition: width 1s ease;
+      width: 0;
+    }
+    .voortgangs-balk.bereikt {
+      background: linear-gradient(90deg, var(--green), var(--green-dark));
+    }
+    .bereikt-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green-light); color: var(--green-dark);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 12px; font-weight: 800; margin-top: 10px;
+    }
+
+    /* ── TAKEN ── */
+    .taak-kaart {
+      display: flex; align-items: center; gap: 14px;
+      background: white; border-radius: 20px;
+      border: 2px solid var(--border);
+      padding: 16px 16px; margin-bottom: 10px;
+      cursor: pointer; transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .taak-kaart:active { transform: scale(0.97); }
+    .taak-kaart.klaar {
+      background: var(--green-light);
+      border-color: var(--green);
+    }
+    .taak-check {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+      transition: all 0.25s; background: white;
+    }
+    .taak-kaart.klaar .taak-check {
+      background: var(--green); border-color: var(--green); color: white;
+    }
+    .taak-emoji { font-size: 32px; flex-shrink: 0; }
+    .taak-info { flex: 1; }
+    .taak-naam {
+      font-family: 'Baloo 2', sans-serif; font-size: 17px; font-weight: 800;
+      color: var(--text); line-height: 1.2;
+    }
+    .taak-kaart.klaar .taak-naam { color: var(--green-dark); }
+    .taak-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
+    .taak-beloning {
+      font-family: 'Baloo 2', sans-serif; font-size: 18px; font-weight: 800;
+      color: var(--amber); flex-shrink: 0;
+    }
+    .taak-kaart.klaar .taak-beloning { color: var(--green); }
+
+    /* ── ALLES KLAAR BANNER ── */
+    .alles-klaar {
+      display: none; text-align: center;
+      background: linear-gradient(135deg, var(--amber-light), #FFF3C4);
+      border: 2px solid var(--amber);
+      border-radius: 20px; padding: 24px;
+      margin-top: 8px;
+    }
+    .alles-klaar.zichtbaar { display: block; animation: popIn 0.4s ease; }
+    .alles-klaar-icon { font-size: 52px; animation: tada 1s ease; display: block; }
+    .alles-klaar-titel {
+      font-family: 'Baloo 2', sans-serif; font-size: 24px; font-weight: 800;
+      color: var(--orange); margin-top: 8px;
+    }
+    .alles-klaar-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── GROTE KNOPPEN ── */
+    .knop-rij { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .grote-knop {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      padding: 20px; border-radius: 20px;
+      font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800;
+      border: none; cursor: pointer;
+      transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      text-decoration: none; color: white;
+    }
+    .grote-knop:active { transform: scale(0.97); }
+    .grote-knop-icon { font-size: 28px; }
+    .grote-knop.paars { background: linear-gradient(135deg, var(--purple), #5B54C8); }
+    .grote-knop.oranje { background: linear-gradient(135deg, var(--orange), #B33D18); }
+
+    /* ── LEGE STAAT ── */
+    .leeg-staat {
+      text-align: center; padding: 32px 20px;
+      background: white; border-radius: 20px; border: 1.5px dashed var(--border);
+    }
+    .leeg-staat-icon { font-size: 48px; margin-bottom: 10px; display: block; }
+    .leeg-staat-titel { font-size: 16px; font-weight: 800; margin-bottom: 4px; color: var(--text); }
+    .leeg-staat-sub { font-size: 13px; color: var(--text-muted); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--text); color: white;
+      padding: 14px 24px; border-radius: 16px;
+      font-size: 15px; font-weight: 700; z-index: 500;
+      opacity: 0; transition: all 0.3s; white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      pointer-events: none;
+    }
+    .toast.zichtbaar { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.succes { background: var(--green); }
+    .toast.fout { background: var(--red); }
+
+    /* ── MUNT ANIMATIE ── */
+    .munt-pop {
+      position: fixed; font-size: 28px; font-weight: 800;
+      color: var(--amber); pointer-events: none; z-index: 400;
+      animation: confetti 0.8s ease forwards;
+      font-family: 'Baloo 2', sans-serif;
+    }
+
+    /* ── PIN OVERLAY ── */
+    .pin-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); z-index: 300;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .pin-overlay.open { display: flex; }
+    .pin-box {
+      background: white; border-radius: 28px;
+      padding: 36px 28px; text-align: center;
+      width: 100%; max-width: 320px;
+      animation: popIn 0.3s ease;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .pin-icon { font-size: 40px; margin-bottom: 8px; }
+    .pin-titel {
+      font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .pin-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .pin-dots { display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; }
+    .pin-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--border); transition: all 0.2s;
+    }
+    .pin-dot.gevuld { background: var(--green); transform: scale(1.1); }
+    .pin-raster { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .pin-knop {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 16px;
+      font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .pin-knop:hover { background: var(--green-light); border-color: var(--green); }
+    .pin-knop:active { transform: scale(0.95); }
+    .pin-fout { color: var(--red); font-size: 13px; font-weight: 700; margin-top: 12px; min-height: 20px; animation: shake 0.3s ease; }
+
+    /* ── GEEN ACCOUNT ── */
+    .geen-account {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 40px 24px; color: white;
+    }
+    .geen-account-icon { font-size: 72px; margin-bottom: 16px; }
+    .geen-account-titel {
+      font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .geen-account-sub { font-size: 15px; opacity: 0.8; margin-bottom: 24px; line-height: 1.6; }
+    .naar-login {
+      background: white; color: var(--green-dark);
+      border: none; border-radius: 14px; padding: 16px 32px;
+      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+      cursor: pointer; text-decoration: none; display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="laad-scherm" class="loading-screen">
+  <div class="loading-pig">🐷</div>
+  <div class="loading-text">Even laden...</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- GEEN ACCOUNT -->
+<div id="geen-account" class="geen-account" style="display:none">
+  <div class="geen-account-icon">🔐</div>
+  <div class="geen-account-titel">Niet ingelogd</div>
+  <div class="geen-account-sub">
+    Vraag je ouder om het kindscherm<br>voor jou te openen.
+  </div>
+  <a href="login.html" class="naar-login">Naar inloggen →</a>
+</div>
+
+<!-- KINDSCHERM -->
+<div id="kindscherm" class="kindscherm" style="display:none">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">Kind<span>geld</span> 🐷</div>
+    <button class="btn-ouder" onclick="openPinOverlay()">🔒 Ouder</button>
+  </div>
+
+  <!-- KIND SELECTOR (meerdere kinderen) -->
+  <div class="kind-selector" id="kind-selector" style="display:none"></div>
+
+  <!-- HERO -->
+  <div class="hero-sectie">
+    <span class="avatar-groot" id="kind-avatar">🐷</span>
+    <div class="kind-naam" id="kind-naam">-</div>
+    <div class="groet-tekst" id="groet-tekst">Hoi! Klaar om te sparen? 🚀</div>
+  </div>
+
+  <!-- SALDO -->
+  <div class="saldo-kaart">
+    <div class="saldo-label">Mijn spaarpot 💰</div>
+    <div class="saldo-bedrag" id="saldo-bedrag">€0,00</div>
+    <div class="saldo-subtekst" id="saldo-subtekst">Blijf zo sparen!</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-rij">
+    <div class="stat-chip">
+      <span class="stat-chip-icon">🪙</span>
+      <div class="stat-chip-val" id="munten-val">0</div>
+      <div class="stat-chip-lbl">Munten</div>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-chip-icon">🔥</span>
+      <div class="stat-chip-val" id="streak-val">0</div>
+      <div class="stat-chip-lbl">Dagen streak</div>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-chip-icon">✅</span>
+      <div class="stat-chip-val" id="klaar-val">0</div>
+      <div class="stat-chip-lbl">Taken klaar</div>
+    </div>
+  </div>
+
+  <!-- ONDERPANEEL -->
+  <div class="onderpaneel">
+
+    <!-- SPAARDOELEN -->
+    <div class="sectie-header">
+      <div class="sectie-titel">🎯 Mijn spaardoelen</div>
+      <div class="sectie-teller" id="doelen-teller" style="display:none"></div>
+    </div>
+    <div id="doelen-lijst">
+      <div class="leeg-staat">
+        <span class="leeg-staat-icon">🎯</span>
+        <div class="leeg-staat-titel">Nog geen spaardoel</div>
+        <div class="leeg-staat-sub">Vraag je ouder om een spaardoel in te stellen</div>
+      </div>
+    </div>
+
+    <!-- TAKEN / UITDAGINGEN -->
+    <div class="sectie-header" style="margin-top:28px">
+      <div class="sectie-titel">⚡ Mijn taken</div>
+      <div class="sectie-teller" id="taken-teller" style="display:none"></div>
+    </div>
+    <div id="taken-lijst">
+      <div class="leeg-staat">
+        <span class="leeg-staat-icon">⚡</span>
+        <div class="leeg-staat-titel">Nog geen taken</div>
+        <div class="leeg-staat-sub">Vraag je ouder om uitdagingen toe te voegen</div>
+      </div>
+    </div>
+    <div class="alles-klaar" id="alles-klaar">
+      <span class="alles-klaar-icon">🎉</span>
+      <div class="alles-klaar-titel">Alles klaar!</div>
+      <div class="alles-klaar-sub">Super goed gedaan vandaag! Je bent een held 🦸</div>
+    </div>
+
+    <!-- ACTIEKNOPPEN -->
+    <div class="knop-rij">
+      <a href="beloningen.html" class="grote-knop paars">
+        <span class="grote-knop-icon">🏆</span>
+        Beloningenwinkel
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- PIN OVERLAY -->
+<div class="pin-overlay" id="pin-overlay">
+  <div class="pin-box">
+    <div class="pin-icon">🔒</div>
+    <div class="pin-titel">Oudermodus</div>
+    <div class="pin-sub">Voer de ouder-PIN in</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+      <div class="pin-dot" id="pd4"></div>
+    </div>
+    <div class="pin-raster">
+      <button class="pin-knop" onclick="pinInvoer('1')">1</button>
+      <button class="pin-knop" onclick="pinInvoer('2')">2</button>
+      <button class="pin-knop" onclick="pinInvoer('3')">3</button>
+      <button class="pin-knop" onclick="pinInvoer('4')">4</button>
+      <button class="pin-knop" onclick="pinInvoer('5')">5</button>
+      <button class="pin-knop" onclick="pinInvoer('6')">6</button>
+      <button class="pin-knop" onclick="pinInvoer('7')">7</button>
+      <button class="pin-knop" onclick="pinInvoer('8')">8</button>
+      <button class="pin-knop" onclick="pinInvoer('9')">9</button>
+      <button class="pin-knop" onclick="pinSluit()" style="font-size:14px;color:var(--text-muted)">Sluiten</button>
+      <button class="pin-knop" onclick="pinInvoer('0')">0</button>
+      <button class="pin-knop" onclick="pinVerwijder()" style="font-size:18px">⌫</button>
+    </div>
+    <div class="pin-fout" id="pin-fout"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://ysdwxbwfbayygujlshxi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzZHd4YndmYmF5eWd1amxzaHhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTc5OTMsImV4cCI6MjA4ODk5Mzk5M30.qsxpi4ls-5pLzLMVxzwfuF1YenB4ZpML8KE8QOq1mek';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let huidigKind = null;
+let alleKinderen = [];
+let uitdagingen = [];
+let spaardoelen = [];
+let pinBuffer = '';
+
+// ── INIT ──────────────────────────────────────
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  const { data: { user } } = await db.auth.getUser();
+
+  if (!user) {
+    toon('geen-account');
+    return;
+  }
+
+  const { data: kinderen } = await db
+    .from('kinderen')
+    .select('*')
+    .eq('ouder_id', user.id)
+    .order('aangemaakt_op');
+
+  alleKinderen = kinderen || [];
+
+  if (!alleKinderen.length) {
+    document.getElementById('laad-scherm').innerHTML = `
+      <div style="text-align:center;padding:40px">
+        <div style="font-size:72px;margin-bottom:16px">👶</div>
+        <div style="font-family:'Baloo 2',sans-serif;font-size:22px;font-weight:800;color:white;margin-bottom:8px">Nog geen kind toegevoegd</div>
+        <div style="font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:24px">Ga naar het dashboard om een kind toe te voegen</div>
+        <a href="dashboard.html" style="background:white;color:var(--green-dark);border-radius:14px;padding:14px 28px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;text-decoration:none">Naar dashboard →</a>
+      </div>`;
+    return;
+  }
+
+  // Bepaal welk kind te tonen: via URL param of eerste kind
+  const params = new URLSearchParams(window.location.search);
+  const kindId = params.get('kind');
+  const startKind = kindId
+    ? alleKinderen.find(k => k.id === kindId) || alleKinderen[0]
+    : alleKinderen[0];
+
+  // Bouw kind-selector als er meerdere kinderen zijn
+  if (alleKinderen.length > 1) {
+    bouwKindSelector();
+  }
+
+  toon('kindscherm');
+  await laadKind(startKind);
+}
+
+function toon(id) {
+  ['laad-scherm', 'geen-account', 'kindscherm'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? (s === 'kindscherm' ? 'flex' : 'flex') : 'none';
+  });
+  if (id === 'kindscherm') document.getElementById('kindscherm').style.flexDirection = 'column';
+}
+
+function bouwKindSelector() {
+  const sel = document.getElementById('kind-selector');
+  sel.style.display = 'flex';
+  alleKinderen.forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'kind-chip' + (k === alleKinderen[0] ? ' actief' : '');
+    btn.dataset.id = k.id;
+    btn.innerHTML = `${k.avatar || '🐷'} ${k.naam}`;
+    btn.onclick = async () => {
+      sel.querySelectorAll('.kind-chip').forEach(c => c.classList.remove('actief'));
+      btn.classList.add('actief');
+      await laadKind(k);
+    };
+    sel.appendChild(btn);
+  });
+}
+
+async function laadKind(kind) {
+  huidigKind = kind;
+
+  // Update URL (zonder reload)
+  history.replaceState(null, '', `kindscherm.html?kind=${kind.id}`);
+
+  // Groet
+  const uur = new Date().getHours();
+  const groet = uur < 12 ? 'Goedemorgen' : uur < 18 ? 'Goedemiddag' : 'Goedenavond';
+  document.getElementById('groet-tekst').textContent = `${groet}, ${kind.naam}! 🚀`;
+
+  // Avatar & naam
+  document.getElementById('kind-avatar').textContent = kind.avatar || '🐷';
+  document.getElementById('kind-naam').textContent = kind.naam;
+
+  // Saldo
+  const saldo = parseFloat(kind.saldo) || 0;
+  document.getElementById('saldo-bedrag').textContent = euro(saldo);
+  document.getElementById('saldo-subtekst').textContent = saldo >= 10
+    ? `Wauw, ${euro(saldo)}! Je spaart geweldig! 🌟`
+    : saldo > 0
+    ? `Je bent al goed op weg! Blijf zo! 💪`
+    : 'Verdien je eerste munten! Doe een taak ⚡';
+
+  // Stats
+  document.getElementById('munten-val').textContent = kind.munten || 0;
+  document.getElementById('streak-val').textContent = kind.streak || 0;
+
+  // Kind-selector bijwerken
+  document.querySelectorAll('.kind-chip').forEach(c => {
+    c.classList.toggle('actief', c.dataset.id === kind.id);
+  });
+
+  // Data laden
+  await laadSpaardoelen();
+  await laadTaken();
+}
+
+// ── SPAARDOELEN ──────────────────────────────
+async function laadSpaardoelen() {
+  const { data } = await db
+    .from('spaardoelen')
+    .select('*')
+    .eq('kind_id', huidigKind.id)
+    .eq('actief', true)
+    .order('aangemaakt_op');
+
+  spaardoelen = data || [];
+  renderSpaardoelen();
+}
+
+function renderSpaardoelen() {
+  const container = document.getElementById('doelen-lijst');
+  const teller = document.getElementById('doelen-teller');
+
+  if (!spaardoelen.length) {
+    teller.style.display = 'none';
+    container.innerHTML = `
+      <div class="leeg-staat">
+        <span class="leeg-staat-icon">🎯</span>
+        <div class="leeg-staat-titel">Nog geen spaardoel</div>
+        <div class="leeg-staat-sub">Vraag je ouder om een spaardoel in te stellen</div>
+      </div>`;
+    return;
+  }
+
+  teller.style.display = 'inline-flex';
+  teller.textContent = `${spaardoelen.length} ${spaardoelen.length === 1 ? 'doel' : 'doelen'}`;
+
+  container.innerHTML = spaardoelen.map(doel => {
+    const huidig = parseFloat(doel.huidig_bedrag) || 0;
+    const target = parseFloat(doel.doelbedrag) || 1;
+    const pct = Math.min(Math.round((huidig / target) * 100), 100);
+    const bereikt = pct >= 100;
+    return `
+      <div class="spaardoel-kaart">
+        <div class="spaardoel-top">
+          <div class="spaardoel-emoji-wrap">${doel.emoji || '🎯'}</div>
+          <div class="spaardoel-info">
+            <div class="spaardoel-naam">${doel.naam}</div>
+            <div class="spaardoel-bedragen">${euro(huidig)} van ${euro(target)}</div>
+          </div>
+          <div class="spaardoel-pct ${bereikt ? 'bereikt' : ''}">${pct}%</div>
+        </div>
+        <div class="voortgangs-balk-wrap">
+          <div class="voortgangs-balk ${bereikt ? 'bereikt' : ''}"
+               style="--fill:${pct}%"
+               data-fill="${pct}"></div>
+        </div>
+        ${bereikt ? '<div class="bereikt-badge">🎉 Spaardoel bereikt! Super goed!</div>' : ''}
+      </div>`;
+  }).join('');
+
+  // Animeer voortgangsbalken
+  requestAnimationFrame(() => {
+    container.querySelectorAll('.voortgangs-balk').forEach(balk => {
+      balk.style.width = balk.dataset.fill + '%';
+    });
+  });
+}
+
+// ── TAKEN / UITDAGINGEN ────────────────────────
+async function laadTaken() {
+  const { data } = await db
+    .from('uitdagingen')
+    .select('*')
+    .eq('kind_id', huidigKind.id)
+    .order('aangemaakt_op', { ascending: false });
+
+  uitdagingen = data || [];
+
+  // Reset dagelijks voltooide taken als die van gisteren zijn
+  const vandaag = new Date().toDateString();
+  for (const u of uitdagingen) {
+    if (u.voltooid && u.herhaling === 'dagelijks') {
+      const voltooidOp = u.voltooid_op ? new Date(u.voltooid_op).toDateString() : null;
+      if (voltooidOp !== vandaag) {
+        await db.from('uitdagingen').update({ voltooid: false, voltooid_op: null }).eq('id', u.id);
+        u.voltooid = false;
+        u.voltooid_op = null;
+      }
+    }
+  }
+
+  renderTaken();
+}
+
+function renderTaken() {
+  const container = document.getElementById('taken-lijst');
+  const teller = document.getElementById('taken-teller');
+  const allKlaar = document.getElementById('alles-klaar');
+
+  if (!uitdagingen.length) {
+    teller.style.display = 'none';
+    allKlaar.classList.remove('zichtbaar');
+    container.innerHTML = `
+      <div class="leeg-staat">
+        <span class="leeg-staat-icon">⚡</span>
+        <div class="leeg-staat-titel">Nog geen taken</div>
+        <div class="leeg-staat-sub">Vraag je ouder om uitdagingen toe te voegen</div>
+      </div>`;
+    return;
+  }
+
+  // Sorteer: onvoltooid eerst
+  const gesorteerd = [...uitdagingen].sort((a, b) => {
+    if (!a.voltooid && b.voltooid) return -1;
+    if (a.voltooid && !b.voltooid) return 1;
+    return 0;
+  });
+
+  const voltooid = uitdagingen.filter(u => u.voltooid).length;
+  const totaal = uitdagingen.length;
+
+  teller.style.display = 'inline-flex';
+  teller.textContent = `${voltooid}/${totaal} klaar`;
+
+  container.innerHTML = gesorteerd.map(u => `
+    <div class="taak-kaart ${u.voltooid ? 'klaar' : ''}" id="taak-${u.id}" onclick="toggleTaak('${u.id}', ${u.voltooid})">
+      <div class="taak-check">${u.voltooid ? '✓' : ''}</div>
+      <span class="taak-emoji">${u.emoji || '⚡'}</span>
+      <div class="taak-info">
+        <div class="taak-naam">${u.naam}</div>
+        <div class="taak-sub">${u.voltooid ? 'Gedaan! 🎉' : (u.herhaling === 'dagelijks' ? 'Elke dag' : u.herhaling === 'wekelijks' ? 'Elke week' : 'Eenmalig')}</div>
+      </div>
+      <div class="taak-beloning">${u.voltooid ? '✓' : '+'} 🪙${u.beloning_munten || 5}</div>
+    </div>
+  `).join('');
+
+  // Klaar-stat bijwerken
+  document.getElementById('klaar-val').textContent = voltooid;
+
+  // Alles klaar banner
+  const allesBuiten = uitdagingen.every(u => u.herhaling === 'eenmalig' && u.voltooid);
+  const allesDagelijks = uitdagingen.filter(u => u.herhaling !== 'eenmalig');
+  const klaarVandaag = allesDagelijks.length > 0 && allesDagelijks.every(u => u.voltooid);
+  if (totaal > 0 && (allesBuiten || klaarVandaag || voltooid === totaal)) {
+    allKlaar.classList.add('zichtbaar');
+  } else {
+    allKlaar.classList.remove('zichtbaar');
+  }
+}
+
+async function toggleTaak(id, wasVoltooid) {
+  const uitdaging = uitdagingen.find(u => u.id === id);
+  if (!uitdaging) return;
+  if (wasVoltooid && uitdaging.herhaling === 'eenmalig') return; // eenmalig: niet ongedaan maken
+
+  const wordtVoltooid = !wasVoltooid;
+
+  // Optimistisch bijwerken
+  uitdaging.voltooid = wordtVoltooid;
+  uitdaging.voltooid_op = wordtVoltooid ? new Date().toISOString() : null;
+  renderTaken();
+
+  if (wordtVoltooid) {
+    // Munten verdienen
+    const munten = uitdaging.beloning_munten || 5;
+    const huidigMunten = huidigKind.munten || 0;
+    const nieuwMunten = huidigMunten + munten;
+
+    await db.from('uitdagingen').update({
+      voltooid: true, voltooid_op: new Date().toISOString()
+    }).eq('id', id);
+
+    await db.from('kinderen').update({ munten: nieuwMunten }).eq('id', huidigKind.id);
+
+    // Euro beloning?
+    if (uitdaging.beloning_euro > 0) {
+      const nieuwSaldo = (parseFloat(huidigKind.saldo) || 0) + uitdaging.beloning_euro;
+      await db.from('kinderen').update({ saldo: nieuwSaldo }).eq('id', huidigKind.id);
+      huidigKind.saldo = nieuwSaldo;
+      document.getElementById('saldo-bedrag').textContent = euro(nieuwSaldo);
+    }
+
+    huidigKind.munten = nieuwMunten;
+    document.getElementById('munten-val').textContent = nieuwMunten;
+
+    toonMuntAnimatie(munten, id);
+    toonToast(`+🪙${munten} verdiend! Super goed! 🎉`, 'succes');
+  } else {
+    // Ongedaan maken
+    const munten = uitdaging.beloning_munten || 5;
+    const nieuwMunten = Math.max(0, (huidigKind.munten || 0) - munten);
+    await db.from('uitdagingen').update({ voltooid: false, voltooid_op: null }).eq('id', id);
+    await db.from('kinderen').update({ munten: nieuwMunten }).eq('id', huidigKind.id);
+    huidigKind.munten = nieuwMunten;
+    document.getElementById('munten-val').textContent = nieuwMunten;
+    toonToast('Taak ongedaan gemaakt');
+  }
+}
+
+function toonMuntAnimatie(munten, taakId) {
+  const kaart = document.getElementById('taak-' + taakId);
+  if (!kaart) return;
+  const rect = kaart.getBoundingClientRect();
+  const pop = document.createElement('div');
+  pop.className = 'munt-pop';
+  pop.textContent = `+🪙${munten}`;
+  pop.style.left = (rect.left + rect.width / 2 - 30) + 'px';
+  pop.style.top = (rect.top + window.scrollY) + 'px';
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 900);
+}
+
+// ── HULPFUNCTIES ──────────────────────────────
+function euro(bedrag) {
+  return '€' + parseFloat(bedrag || 0).toFixed(2).replace('.', ',');
+}
+
+function toonToast(bericht, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = bericht;
+  el.className = 'toast zichtbaar ' + type;
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.className = 'toast', 3000);
+}
+
+// ── PIN ───────────────────────────────────────
+function openPinOverlay() {
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pin-fout').textContent = '';
+  document.getElementById('pin-overlay').classList.add('open');
+}
+
+function pinSluit() {
+  pinBuffer = '';
+  document.getElementById('pin-overlay').classList.remove('open');
+}
+
+function pinInvoer(cijfer) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += cijfer;
+  updatePinDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(controleerPin, 200);
+  }
+}
+
+function pinVerwijder() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pin-fout').textContent = '';
+}
+
+function updatePinDots() {
+  [1, 2, 3, 4].forEach(i => {
+    document.getElementById('pd' + i).classList.toggle('gevuld', i <= pinBuffer.length);
+  });
+}
+
+async function controleerPin() {
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) { pinSluit(); return; }
+
+  const { data: profiel } = await db.from('profielen').select('pin').eq('id', user.id).single();
+  const opgeslagenPin = profiel?.pin;
+
+  if (!opgeslagenPin) {
+    // Geen PIN ingesteld → direct door naar dashboard
+    pinSluit();
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  if (pinBuffer === opgeslagenPin) {
+    pinSluit();
+    window.location.href = 'dashboard.html';
+  } else {
+    document.getElementById('pin-fout').textContent = '❌ Verkeerde PIN, probeer opnieuw';
+    pinBuffer = '';
+    updatePinDots();
+  }
+}
+</script>
+</body>
+</html>

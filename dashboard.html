@@ -223,7 +223,7 @@
     <button class="nav-item active">
       <div class="nav-icon">🏠</div><span class="nav-label">Dashboard</span>
     </button>
-    <button class="nav-item" onclick="naarKindScherm()">
+    <button class="nav-item" onclick="naarKindSchermPagina()">
       <div class="nav-icon">🐷</div><span class="nav-label">Kindscherm</span>
     </button>
     <a href="beloningen.html" class="nav-item" style="text-decoration:none">
@@ -1271,6 +1271,11 @@ async function uitloggen() {
 }
 
 // ── KIND MODUS ────────────────────────────────────────
+function naarKindSchermPagina() {
+  const url = huidigKind ? `kindscherm.html?kind=${huidigKind.id}` : 'kindscherm.html';
+  window.location.href = url;
+}
+
 function naarKindScherm() {
   document.querySelector('.sidebar').style.display = 'none';
   document.querySelector('.main').style.display = 'none';
