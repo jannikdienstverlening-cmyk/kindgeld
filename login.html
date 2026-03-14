@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kindgeld — Account aanmaken</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <!-- Supabase via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Jouw keys staan in kindgeld-db.js — hoef je maar op 1 plek aan te passen -->
-  <script src="kindgeld-db.js"></script>
   <style>
     :root {
       --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #085041;
@@ -30,7 +27,7 @@
     .auth-sub { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 28px; }
     .form-group { margin-bottom: 14px; }
     label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-    input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--border); font-family: 'Nunito', sans-serif; font-size: 14px; background: var(--bg); outline: none; transition: border-color 0.2s; }
+    input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--border); font-family: 'Nunito', sans-serif; font-size: 14px; background: var(--bg); outline: none; transition: border-color 0.2s; color: var(--text); }
     input:focus { border-color: var(--green); background: white; }
     .btn-submit { width: 100%; padding: 14px; background: var(--green); color: white; border: none; border-radius: 13px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 4px; transition: all 0.2s; }
     .btn-submit:hover { background: var(--green-dark); }
@@ -122,10 +119,12 @@
 </div>
 
 <script>
-  // Gebruik KG.db van kindgeld-db.js — keys hoef je maar op 1 plek in te vullen!
-  var db = KG.db;
+  const { createClient } = supabase;
+  const db = createClient(
+    'https://ysdwxbwfbayygujlshxi.supabase.co',
+    'sb_publishable_WR0ehCXsAePoAQr19Tplgg_MGJPD-6L'
+  );
 
-  // Al ingelogd? → direct naar dashboard
   (async () => {
     try {
       const { data: { user } } = await db.auth.getUser();
@@ -139,33 +138,28 @@
     document.getElementById('scherm-verificatie').style.display = 'none';
     resetAlerts();
   }
-
   function toonLogin() {
     document.getElementById('scherm-login').style.display = 'block';
     document.getElementById('scherm-registreer').style.display = 'none';
     document.getElementById('scherm-verificatie').style.display = 'none';
     resetAlerts();
   }
-
   function resetAlerts() {
     document.getElementById('alert-error').classList.remove('show');
     document.getElementById('alert-success').classList.remove('show');
   }
-
   function toonFout(msg) {
     var el = document.getElementById('alert-error');
     el.textContent = '⚠️ ' + msg;
     el.classList.add('show');
     document.getElementById('alert-success').classList.remove('show');
   }
-
   function toonSucces(msg) {
     var el = document.getElementById('alert-success');
     el.textContent = '✓ ' + msg;
     el.classList.add('show');
     document.getElementById('alert-error').classList.remove('show');
   }
-
   function setLaden(btnId, laden, tekst) {
     var btn = document.getElementById(btnId);
     btn.disabled = laden;
@@ -182,14 +176,17 @@
     setLaden('btn-registreer', true, 'Account aanmaken →');
     resetAlerts();
     try {
-      const { error } = await db.auth.signUp({ email, password: ww, options: { data: { naam } } });
+      const { error } = await db.auth.signUp({
+        email, password: ww,
+        options: { data: { naam } }
+      });
       if (error) throw error;
       document.getElementById('verify-email-tonen').textContent = email;
       document.getElementById('scherm-registreer').style.display = 'none';
       document.getElementById('scherm-verificatie').style.display = 'block';
     } catch(e) {
       var msg = e.message || 'Er ging iets mis.';
-      if (msg.includes('already registered')) msg = 'Dit e-mailadres is al in gebruik.';
+      if (msg.includes('already registered')) msg = 'Dit e-mailadres is al in gebruik. Probeer in te loggen.';
       toonFout(msg);
     } finally {
       setLaden('btn-registreer', false, 'Account aanmaken →');
