@@ -5,81 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kindgeld — Account aanmaken</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Supabase via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Jouw keys staan in kindgeld-db.js — hoef je maar op 1 plek aan te passen -->
+  <script src="kindgeld-db.js"></script>
   <style>
     :root {
       --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #085041;
-      --orange: #D85A30; --orange-light: #FAECE7;
-      --amber: #EF9F27;
+      --orange: #D85A30;
       --text: #1a1a1a; --text-muted: #6b7280;
       --border: rgba(0,0,0,0.09); --bg: #FAFAF8; --white: #ffffff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Nunito', sans-serif; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; }
-
     nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 40px; background: var(--white); border-bottom: 1px solid var(--border); }
     .logo { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; color: var(--orange); text-decoration: none; }
     .logo span { color: var(--green); }
     .nav-back { font-size: 14px; font-weight: 700; color: var(--text-muted); text-decoration: none; }
     .nav-back:hover { color: var(--green); }
-
     .page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
-
     .auth-card { background: var(--white); border-radius: 24px; padding: 36px; width: 100%; max-width: 420px; border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
     .auth-icon { font-size: 48px; text-align: center; margin-bottom: 8px; }
-    .auth-title { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); text-align: center; margin-bottom: 4px; }
+    .auth-title { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 4px; }
     .auth-sub { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 28px; }
-
     .form-group { margin-bottom: 14px; }
-    label { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-    input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--border); font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); transition: border-color 0.2s; outline: none; }
+    label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--border); font-family: 'Nunito', sans-serif; font-size: 14px; background: var(--bg); outline: none; transition: border-color 0.2s; }
     input:focus { border-color: var(--green); background: white; }
-
     .btn-submit { width: 100%; padding: 14px; background: var(--green); color: white; border: none; border-radius: 13px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 4px; transition: all 0.2s; }
     .btn-submit:hover { background: var(--green-dark); }
     .btn-submit:disabled { opacity: 0.6; cursor: wait; }
-
-    .divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; }
-    .divider-line { flex: 1; height: 1px; background: var(--border); }
-    .divider-text { font-size: 12px; color: var(--text-muted); font-weight: 600; }
-
-    .btn-google { width: 100%; padding: 12px; background: var(--white); color: var(--text); border: 1.5px solid var(--border); border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; }
-    .btn-google:hover { background: var(--bg); border-color: #ccc; }
-
     .auth-switch { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted); }
     .auth-switch a { color: var(--green); font-weight: 700; cursor: pointer; }
-
     .alert { padding: 12px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 16px; display: none; }
     .alert.show { display: block; }
     .alert-error { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
     .alert-success { background: var(--green-light); color: var(--green-dark); border: 1px solid #A7F3D0; }
-
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     .verify-screen { text-align: center; padding: 20px 0; }
     .verify-icon { font-size: 60px; margin-bottom: 16px; animation: bounce 1s ease infinite; }
     @keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)} }
     .verify-title { font-family: 'Baloo 2', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
     .verify-sub { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
     .btn-resend { background: transparent; border: none; color: var(--green); font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 16px; display: block; margin-left: auto; margin-right: auto; }
-
-    @media (max-width: 480px) {
-      nav { padding: 16px 20px; }
-      .auth-card { padding: 28px 20px; }
-    }
+    @media (max-width: 480px) { nav { padding: 16px 20px; } .auth-card { padding: 28px 20px; } }
   </style>
 </head>
 <body>
 
 <nav>
-  <a href="landing.html" class="logo">Kind<span>geld</span></a>
-  <a href="landing.html" class="nav-back">← Terug</a>
+  <a href="index.html" class="logo">Kind<span>geld</span></a>
+  <a href="index.html" class="nav-back">← Terug</a>
 </nav>
 
 <div class="page">
   <div class="auth-card">
-
     <div class="alert alert-error" id="alert-error"></div>
     <div class="alert alert-success" id="alert-success"></div>
 
@@ -88,7 +69,6 @@
       <div class="auth-icon">🐷</div>
       <div class="auth-title">Account aanmaken</div>
       <div class="auth-sub">Gratis beginnen — geen creditcard nodig</div>
-
       <div class="form-group">
         <label>Jouw naam</label>
         <input type="text" id="reg-naam" placeholder="Sara de Vries" autocomplete="name">
@@ -101,9 +81,7 @@
         <label>Wachtwoord</label>
         <input type="password" id="reg-wachtwoord" placeholder="Minimaal 8 tekens" autocomplete="new-password">
       </div>
-
       <button class="btn-submit" id="btn-registreer" onclick="registreer()">Account aanmaken →</button>
-
       <div class="auth-switch">Al een account? <a onclick="toonLogin()">Inloggen</a></div>
     </div>
 
@@ -112,7 +90,6 @@
       <div class="auth-icon">👋</div>
       <div class="auth-title">Welkom terug!</div>
       <div class="auth-sub">Log in op jouw Kindgeld account</div>
-
       <div class="form-group">
         <label>E-mailadres</label>
         <input type="email" id="login-email" placeholder="sara@gmail.com" autocomplete="email">
@@ -124,9 +101,7 @@
       <div style="text-align:right;margin-bottom:12px">
         <a style="font-size:12px;color:var(--text-muted);cursor:pointer" onclick="wachtwoordVergeten()">Wachtwoord vergeten?</a>
       </div>
-
       <button class="btn-submit" id="btn-login" onclick="inloggen()">Inloggen →</button>
-
       <div class="auth-switch">Nog geen account? <a onclick="toonRegistreer()">Gratis aanmelden</a></div>
     </div>
 
@@ -143,18 +118,12 @@
         <button class="btn-resend" onclick="opnieuwVersturen()">Mail niet ontvangen? Opnieuw versturen</button>
       </div>
     </div>
-
   </div>
 </div>
 
 <script>
-  // ── SUPABASE CONFIG ── VERVANG MET JOUW WAARDEN ──
-  const SUPABASE_URL = 'https://ysdwxbwfbayygujlshxi.supabase.co';
-  const SUPABASE_KEY = 'ysdwxbwfbayygujlshxi';
-  // ─────────────────────────────────────────────────
-
-  const { createClient } = supabase;
-  const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+  // Gebruik KG.db van kindgeld-db.js — keys hoef je maar op 1 plek in te vullen!
+  var db = KG.db;
 
   // Al ingelogd? → direct naar dashboard
   (async () => {
@@ -207,27 +176,20 @@
     var naam = document.getElementById('reg-naam').value.trim();
     var email = document.getElementById('reg-email').value.trim();
     var ww = document.getElementById('reg-wachtwoord').value;
-
     if (!naam) return toonFout('Vul je naam in.');
     if (!email || !email.includes('@')) return toonFout('Vul een geldig e-mailadres in.');
     if (ww.length < 8) return toonFout('Wachtwoord moet minimaal 8 tekens zijn.');
-
     setLaden('btn-registreer', true, 'Account aanmaken →');
     resetAlerts();
-
     try {
-      const { error } = await db.auth.signUp({
-        email, password: ww,
-        options: { data: { naam } }
-      });
+      const { error } = await db.auth.signUp({ email, password: ww, options: { data: { naam } } });
       if (error) throw error;
       document.getElementById('verify-email-tonen').textContent = email;
       document.getElementById('scherm-registreer').style.display = 'none';
       document.getElementById('scherm-verificatie').style.display = 'block';
     } catch(e) {
       var msg = e.message || 'Er ging iets mis.';
-      if (msg.includes('already registered')) msg = 'Dit e-mailadres is al in gebruik. Probeer in te loggen.';
-      if (msg.includes('Invalid API key') || msg.includes('PROJECT_ID')) msg = 'Supabase is nog niet ingesteld. Vul je keys in in index.html.';
+      if (msg.includes('already registered')) msg = 'Dit e-mailadres is al in gebruik.';
       toonFout(msg);
     } finally {
       setLaden('btn-registreer', false, 'Account aanmaken →');
@@ -237,13 +199,10 @@
   async function inloggen() {
     var email = document.getElementById('login-email').value.trim();
     var ww = document.getElementById('login-wachtwoord').value;
-
     if (!email) return toonFout('Vul je e-mailadres in.');
     if (!ww) return toonFout('Vul je wachtwoord in.');
-
     setLaden('btn-login', true, 'Inloggen →');
     resetAlerts();
-
     try {
       const { error } = await db.auth.signInWithPassword({ email, password: ww });
       if (error) throw error;
@@ -258,27 +217,13 @@
     }
   }
 
-  async function googleInloggen() {
-    try {
-      const { error } = await db.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + '/dashboard.html' }
-      });
-      if (error) throw error;
-    } catch(e) {
-      toonFout('Google inloggen mislukt: ' + e.message);
-    }
-  }
-
   async function wachtwoordVergeten() {
     var email = document.getElementById('login-email').value.trim();
     if (!email) return toonFout('Vul eerst je e-mailadres in.');
     try {
       await db.auth.resetPasswordForEmail(email);
       toonSucces('Herstelmail verstuurd naar ' + email);
-    } catch(e) {
-      toonFout(e.message);
-    }
+    } catch(e) { toonFout(e.message); }
   }
 
   async function opnieuwVersturen() {
@@ -295,6 +240,5 @@
     else if (document.getElementById('scherm-login').style.display !== 'none') inloggen();
   });
 </script>
-
 </body>
 </html>
