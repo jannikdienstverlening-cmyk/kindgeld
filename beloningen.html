@@ -5,16 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kindgeld — Beloningenwinkel</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root {
-      --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#085041;
-      --orange:#D85A30;--orange-light:#FAECE7;
-      --amber:#EF9F27;--amber-light:#FAEEDA;
-      --purple:#7F77DD;--purple-light:#EEEDFE;
-      --red:#E24B4A;--red-light:#FCEBEB;
-      --text:#1a1a1a;--text-muted:#6b7280;
-      --border:rgba(0,0,0,0.08);--bg:#F5F4F0;--white:#fff;
-    }
+    :root{--green:#1D9E75;--green-light:#E1F5EE;--green-dark:#085041;--orange:#D85A30;--amber:#EF9F27;--amber-light:#FAEEDA;--purple:#7F77DD;--purple-light:#EEEDFE;--red:#E24B4A;--red-light:#FCEBEB;--text:#1a1a1a;--text-muted:#6b7280;--border:rgba(0,0,0,0.08);--bg:#F5F4F0;--white:#fff;}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;}
     .sidebar{width:230px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;position:fixed;top:0;left:0;height:100vh;z-index:50;}
@@ -32,6 +25,8 @@
     .user-row{display:flex;align-items:center;gap:10px;padding:8px;}
     .user-avatar{width:36px;height:36px;border-radius:50%;background:var(--amber-light);display:flex;align-items:center;justify-content:center;font-size:16px;}
     .user-name{font-size:13px;font-weight:700;}
+    .btn-logout{width:100%;margin-top:6px;padding:8px;background:transparent;border:1px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--text-muted);cursor:pointer;}
+    .btn-logout:hover{background:var(--red-light);color:var(--red);}
     .main{margin-left:230px;padding:28px;min-height:100vh;}
     .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
     .page-title{font-family:'Baloo 2',sans-serif;font-size:28px;font-weight:800;}
@@ -52,7 +47,7 @@
     .shop-item.kan{border-color:rgba(127,119,221,0.3);}
     .shop-item.kan-niet{opacity:0.55;cursor:default;}
     .shop-item.kan-niet:hover{transform:none;box-shadow:none;}
-    .shop-item.toevoegen{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;color:var(--text-muted);}
+    .shop-item.add-card{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;color:var(--text-muted);}
     .shop-emoji{font-size:44px;margin-bottom:10px;display:block;}
     .shop-naam{font-size:14px;font-weight:700;margin-bottom:8px;}
     .shop-prijs{display:inline-flex;align-items:center;background:var(--amber-light);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:800;color:#6B3D00;}
@@ -89,7 +84,10 @@
     .mo{padding:9px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:center;}
     .mo.sel{background:var(--purple-light);border-color:var(--purple);color:#26215C;}
     .btn-p{width:100%;padding:13px;border-radius:13px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;border:none;margin-top:8px;background:var(--purple);color:white;}
+    .btn-p:disabled{opacity:0.6;cursor:wait;}
     .cc{text-align:center;}
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
     .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:white;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:700;z-index:300;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none;}
     .toast.show{opacity:1;transform:translateY(0);}
     .toast.ok{background:var(--green);}
@@ -111,38 +109,46 @@
   <div class="sidebar-bottom">
     <div class="user-row">
       <div class="user-avatar">👨‍👩‍👦</div>
-      <div><div class="user-name" id="sb-naam">Ouder</div></div>
+      <div><div class="user-name" id="sb-naam">Laden...</div></div>
     </div>
+    <button class="btn-logout" onclick="uitloggen()">↩ Uitloggen</button>
   </div>
 </aside>
 
 <main class="main">
-  <div class="page-header">
-    <div>
-      <div class="page-title">🏆 Beloningenwinkel</div>
-      <div class="page-sub">Je kind vraagt een beloning aan — jij keurt goed</div>
-    </div>
-    <button onclick="open_('modal-toevoegen')" style="background:var(--purple);color:white;border:none;border-radius:12px;padding:10px 20px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;">+ Beloning toevoegen</button>
+  <div id="loading" style="text-align:center;padding:80px">
+    <div style="font-size:48px;margin-bottom:12px">🏆</div>
+    <div style="font-size:16px;font-weight:700;color:var(--text-muted)">Winkel laden...</div>
   </div>
 
-  <div class="munten-bar">
-    <div class="munten-info">
-      <span style="font-size:40px">🪙</span>
+  <div id="content" style="display:none">
+    <div class="page-header">
       <div>
-        <div class="munten-val" id="munten-val">0</div>
-        <div class="munten-lbl">munten van <span id="munten-kind">-</span></div>
+        <div class="page-title">🏆 Beloningenwinkel</div>
+        <div class="page-sub">Je kind vraagt een beloning aan — jij keurt goed</div>
       </div>
+      <button onclick="open_('modal-toevoegen')" style="background:var(--purple);color:white;border:none;border-radius:12px;padding:10px 20px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;">+ Beloning toevoegen</button>
     </div>
-    <div class="kind-chips" id="kind-chips"></div>
-  </div>
 
-  <div class="shop-tabs">
-    <button class="shop-tab active" id="t-winkel" onclick="tab('winkel')">🛍️ Winkel</button>
-    <button class="shop-tab" id="t-aanvragen" onclick="tab('aanvragen')">⏳ Aanvragen <span id="badge" style="display:none;background:var(--orange);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px">0</span></button>
-  </div>
+    <div class="munten-bar">
+      <div class="munten-info">
+        <span style="font-size:40px">🪙</span>
+        <div>
+          <div class="munten-val" id="munten-val">0</div>
+          <div class="munten-lbl">munten van <span id="munten-kind">-</span></div>
+        </div>
+      </div>
+      <div class="kind-chips" id="kind-chips"></div>
+    </div>
 
-  <div id="v-winkel"><div class="shop-grid" id="shop-grid"></div></div>
-  <div id="v-aanvragen" style="display:none"><div id="aanvragen-list"></div></div>
+    <div class="shop-tabs">
+      <button class="shop-tab active" id="t-winkel" onclick="tab('winkel')">🛍️ Winkel</button>
+      <button class="shop-tab" id="t-aanvragen" onclick="tab('aanvragen')">⏳ Aanvragen <span id="badge" style="display:none;background:var(--orange);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px">0</span></button>
+    </div>
+
+    <div id="v-winkel"><div class="shop-grid" id="shop-grid"></div></div>
+    <div id="v-aanvragen" style="display:none"><div id="aanvragen-list"></div></div>
+  </div>
 </main>
 
 <div class="toast" id="toast"></div>
@@ -174,7 +180,7 @@
       </div>
       <input class="fi" id="in-munten" type="number" placeholder="Of eigen aantal..." min="1">
     </div>
-    <button class="btn-p" onclick="slaOp()">Toevoegen →</button>
+    <button class="btn-p" id="btn-opslaan" onclick="slaOp()">Toevoegen →</button>
   </div>
 </div>
 
@@ -187,29 +193,54 @@
     <div style="font-family:'Baloo 2',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px" id="c-naam">-</div>
     <div style="font-size:15px;color:var(--text-muted);margin-bottom:16px">Kosten: <strong style="color:var(--purple)" id="c-prijs">🪙0</strong></div>
     <div style="background:var(--purple-light);border-radius:12px;padding:12px;font-size:13px;color:#26215C;margin-bottom:16px" id="c-saldo"></div>
-    <button class="btn-p" onclick="vraagAan()">Aanvragen bij ouder →</button>
+    <button class="btn-p" id="btn-aanvragen" onclick="vraagAan()">Aanvragen bij ouder →</button>
     <div style="font-size:12px;color:var(--text-muted);margin-top:10px">Je ouder moet dit nog goedkeuren</div>
   </div>
 </div>
 
 <script>
+const SUPABASE_URL = 'https://ysdwxbwfbayygujlshxi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzZHd4YndmYmF5eWd1amxzaHhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTc5OTMsImV4cCI6MjA4ODk5Mzk5M30.qsxpi4ls-5pLzLMVxzwfuF1YenB4ZpML8KE8QOq1mek';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const DEFAULTS = [
-  {id:'d1',emoji:'📱',naam:'30 min extra schermtijd',munten:20},
-  {id:'d2',emoji:'🍦',naam:'IJsje uitkiezen',munten:15},
-  {id:'d3',emoji:'🍕',naam:'Pizza avond',munten:30},
-  {id:'d4',emoji:'🎮',naam:'Extra speeltijd',munten:25},
-  {id:'d5',emoji:'🎬',naam:'Film kiezen vanavond',munten:20},
-  {id:'d6',emoji:'😴',naam:'Uur later naar bed',munten:35},
-  {id:'d7',emoji:'🏊',naam:'Naar het zwembad',munten:50},
-  {id:'d8',emoji:'🍿',naam:'Popcorn avond',munten:15},
+  {id:'d1',emoji:'📱',naam:'30 min extra schermtijd',kosten_munten:20},
+  {id:'d2',emoji:'🍦',naam:'IJsje uitkiezen',kosten_munten:15},
+  {id:'d3',emoji:'🍕',naam:'Pizza avond',kosten_munten:30},
+  {id:'d4',emoji:'🎮',naam:'Extra speeltijd',kosten_munten:25},
+  {id:'d5',emoji:'🎬',naam:'Film kiezen vanavond',kosten_munten:20},
+  {id:'d6',emoji:'😴',naam:'Uur later naar bed',kosten_munten:35},
+  {id:'d7',emoji:'🏊',naam:'Naar het zwembad',kosten_munten:50},
+  {id:'d8',emoji:'🍿',naam:'Popcorn avond',kosten_munten:15},
 ];
 
-let kinderen = [], huidigKind = null, gekozenEmoji = '📱', gekozenMunten = 20, teBevestigen = null;
+let gebruiker=null, kinderen=[], huidigKind=null;
+let gekozenEmoji='📱', gekozenMunten=20, teBevestigen=null;
+let winkelItems=[], aanvragen=[];
 
-window.addEventListener('DOMContentLoaded', () => {
-  kinderen = JSON.parse(localStorage.getItem('kg_kinderen') || '[]');
-  if (!kinderen.length) kinderen = [{id:'demo',naam:'Nora',avatar:'🐸',munten:45}];
-  document.getElementById('sb-naam').textContent = localStorage.getItem('kg_ouder_naam') || 'Ouder';
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) { window.location.href='login.html'; return; }
+  gebruiker = user;
+
+  const { data: profiel } = await db.from('profielen').select('*').eq('id', user.id).single();
+  document.getElementById('sb-naam').textContent = profiel?.naam || user.email.split('@')[0];
+
+  const { data: kids } = await db.from('kinderen').select('*').eq('ouder_id', user.id).order('aangemaakt_op');
+  kinderen = kids || [];
+
+  if (!kinderen.length) {
+    document.getElementById('loading').innerHTML = `<div style="text-align:center;padding:80px">
+      <div style="font-size:48px">👶</div>
+      <div style="font-size:16px;font-weight:700;margin-top:12px">Voeg eerst een kind toe</div>
+      <a href="dashboard.html" style="display:inline-block;margin-top:16px;background:var(--purple);color:white;border-radius:12px;padding:10px 20px;font-weight:700;text-decoration:none">Naar dashboard →</a>
+    </div>`;
+    return;
+  }
+
   const chips = document.getElementById('kind-chips');
   kinderen.forEach((k,i) => {
     const b = document.createElement('button');
@@ -218,133 +249,146 @@ window.addEventListener('DOMContentLoaded', () => {
     b.onclick = () => { document.querySelectorAll('.kind-chip').forEach(c=>c.classList.remove('active')); b.classList.add('active'); kiesKind(k); };
     chips.appendChild(b);
   });
-  kiesKind(kinderen[0]);
-});
 
-function kiesKind(k) {
+  document.getElementById('loading').style.display='none';
+  document.getElementById('content').style.display='block';
+  await kiesKind(kinderen[0]);
+}
+
+async function kiesKind(k) {
   huidigKind = k;
   document.getElementById('munten-val').textContent = k.munten||0;
   document.getElementById('munten-kind').textContent = k.naam;
-  renderWinkel(); renderAanvragen();
+  await laadWinkel();
+  await laadAanvragen();
 }
 
-function getItems() {
-  const custom = JSON.parse(localStorage.getItem('kg_bel_'+huidigKind.id)||'[]');
-  const del = JSON.parse(localStorage.getItem('kg_del_'+huidigKind.id)||'[]');
-  return [...custom, ...DEFAULTS.filter(d=>!del.includes(d.id))];
+async function laadWinkel() {
+  const { data } = await db.from('beloningen')
+    .select('*').eq('kind_id', huidigKind.id).eq('status','beschikbaar')
+    .order('aangemaakt_op', { ascending: false });
+  winkelItems = data || [];
+  renderWinkel();
+}
+
+async function laadAanvragen() {
+  const { data } = await db.from('beloningen')
+    .select('*').eq('kind_id', huidigKind.id).neq('status','beschikbaar')
+    .order('aangevraagd_op', { ascending: false });
+  aanvragen = data || [];
+  renderAanvragen();
+  const w = aanvragen.filter(a=>a.status==='aangevraagd').length;
+  const badge = document.getElementById('badge');
+  badge.style.display = w>0?'inline':'none'; badge.textContent=w;
 }
 
 function renderWinkel() {
   const g = document.getElementById('shop-grid');
-  const items = getItems(), m = huidigKind.munten||0;
-  g.innerHTML = items.map(item => {
-    const kan = m >= item.munten, isD = item.id?.startsWith('d');
-    return `<div class="shop-item ${kan?'kan':'kan-niet'}" onclick="${kan?`obv('${item.id}','${item.emoji}','${item.naam.replace(/'/g,"\\'")}',${item.munten})`:''}">
-      ${!isD?`<button class="del-btn" onclick="event.stopPropagation();delItem('${item.id}')">🗑️</button>`:''}
+  const m = huidigKind.munten||0;
+  const alles = [...winkelItems, ...DEFAULTS.filter(d => !winkelItems.some(w=>w.naam===d.naam))];
+
+  g.innerHTML = alles.map(item => {
+    const kan = m >= item.kosten_munten;
+    const isDefault = !!item.id?.startsWith('d');
+    const id = isDefault ? 'default' : item.id;
+    return `<div class="shop-item ${kan?'kan':'kan-niet'}" onclick="${kan?`openBv('${id}','${item.emoji}','${item.naam.replace(/'/g,"\\'")}',${item.kosten_munten})`:''}">
+      ${!isDefault?`<button class="del-btn" onclick="event.stopPropagation();delItem('${item.id}')">🗑️</button>`:''}
       <span class="shop-emoji">${item.emoji}</span>
       <div class="shop-naam">${item.naam}</div>
-      <div class="shop-prijs">🪙 ${item.munten}</div>
-      ${!kan?`<div class="shop-tekort">Nog 🪙${item.munten-m} tekort</div>`:''}
+      <div class="shop-prijs">🪙 ${item.kosten_munten}</div>
+      ${!kan?`<div class="shop-tekort">Nog 🪙${item.kosten_munten-m} tekort</div>`:''}
     </div>`;
   }).join('');
-  g.innerHTML += `<div class="shop-item toevoegen" onclick="open_('modal-toevoegen')"><span style="font-size:36px">+</span><div style="font-size:13px;font-weight:700;margin-top:8px">Eigen beloning</div></div>`;
+
+  g.innerHTML += `<div class="shop-item add-card" onclick="open_('modal-toevoegen')"><span style="font-size:36px">+</span><div style="font-size:13px;font-weight:700;margin-top:8px">Eigen beloning</div></div>`;
 }
 
-function obv(id,emoji,naam,munten) {
-  teBevestigen = {id,emoji,naam,munten};
-  document.getElementById('c-emoji').textContent = emoji;
-  document.getElementById('c-naam').textContent = naam;
-  document.getElementById('c-prijs').textContent = '🪙'+munten;
-  const m = huidigKind.munten||0;
-  document.getElementById('c-saldo').textContent = `Je hebt 🪙${m} · blijft over: 🪙${m-munten}`;
+function openBv(id, emoji, naam, munten) {
+  teBevestigen = {id,emoji,naam,kosten_munten:munten};
+  document.getElementById('c-emoji').textContent=emoji;
+  document.getElementById('c-naam').textContent=naam;
+  document.getElementById('c-prijs').textContent='🪙'+munten;
+  const m=huidigKind.munten||0;
+  document.getElementById('c-saldo').textContent=`Je hebt 🪙${m} · blijft over: 🪙${m-munten}`;
   open_('modal-bevestig');
 }
 
-function vraagAan() {
+async function vraagAan() {
   if (!teBevestigen) return;
-  const list = JSON.parse(localStorage.getItem('kg_aanv_'+huidigKind.id)||'[]');
-  list.unshift({id:Date.now().toString(),...teBevestigen,status:'wacht',datum:new Date().toISOString()});
-  localStorage.setItem('kg_aanv_'+huidigKind.id, JSON.stringify(list));
-  sluit('modal-bevestig');
-  toast(teBevestigen.emoji+' Aangevraagd! Je ouder krijgt een melding.','ok');
-  renderAanvragen();
+  const btn = document.getElementById('btn-aanvragen');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Versturen...';
+  const { error } = await db.from('beloningen').insert({
+    kind_id: huidigKind.id,
+    naam: teBevestigen.naam,
+    emoji: teBevestigen.emoji,
+    kosten_munten: teBevestigen.kosten_munten,
+    status: 'aangevraagd',
+    aangevraagd_op: new Date().toISOString()
+  });
+  if (error) { toast('Fout: '+error.message,'err'); }
+  else { sluit('modal-bevestig'); toast(teBevestigen.emoji+' Aangevraagd! Wacht op goedkeuring.','ok'); await laadAanvragen(); }
+  btn.disabled=false; btn.innerHTML='Aanvragen bij ouder →';
 }
 
-function slaOp() {
+async function slaOp() {
   const naam = document.getElementById('in-naam').value.trim();
   const cm = document.getElementById('in-munten').value;
   const m = parseInt(cm||gekozenMunten);
   if (!naam) return toast('Vul een naam in','err');
   if (!m||m<1) return toast('Vul munten in','err');
-  const list = JSON.parse(localStorage.getItem('kg_bel_'+huidigKind.id)||'[]');
-  list.unshift({id:Date.now().toString(),naam,emoji:gekozenEmoji,munten:m});
-  localStorage.setItem('kg_bel_'+huidigKind.id, JSON.stringify(list));
-  sluit('modal-toevoegen');
-  document.getElementById('in-naam').value='';
-  document.getElementById('in-munten').value='';
-  toast('Beloning toegevoegd! 🏆','ok');
-  renderWinkel();
+  const btn=document.getElementById('btn-opslaan');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Opslaan...';
+  const { error } = await db.from('beloningen').insert({
+    kind_id: huidigKind.id, naam, emoji: gekozenEmoji, kosten_munten: m, status:'beschikbaar'
+  });
+  if (error) { toast('Fout: '+error.message,'err'); }
+  else { sluit('modal-toevoegen'); document.getElementById('in-naam').value=''; document.getElementById('in-munten').value=''; toast('Beloning toegevoegd! 🏆','ok'); await laadWinkel(); }
+  btn.disabled=false; btn.innerHTML='Toevoegen →';
 }
 
-function delItem(id) {
+async function delItem(id) {
   if (!confirm('Verwijderen?')) return;
-  const list = JSON.parse(localStorage.getItem('kg_bel_'+huidigKind.id)||'[]');
-  localStorage.setItem('kg_bel_'+huidigKind.id, JSON.stringify(list.filter(b=>b.id!==id)));
-  toast('Verwijderd'); renderWinkel();
+  await db.from('beloningen').delete().eq('id',id);
+  toast('Verwijderd'); await laadWinkel();
 }
-
-function getAanvragen() { return JSON.parse(localStorage.getItem('kg_aanv_'+huidigKind.id)||'[]'); }
 
 function renderAanvragen() {
   const c = document.getElementById('aanvragen-list');
-  const list = getAanvragen();
-  const w = list.filter(a=>a.status==='wacht').length;
-  const badge = document.getElementById('badge');
-  badge.style.display = w>0?'inline':'none'; badge.textContent=w;
-  if (!list.length) { c.innerHTML='<div class="empty"><span style="font-size:48px;display:block;margin-bottom:12px">⏳</span><div style="font-size:15px;font-weight:700;margin-bottom:6px">Nog geen aanvragen</div><div style="font-size:13px">Koop iets uit de winkel!</div></div>'; return; }
-  c.innerHTML = list.map(a=>`
+  if (!aanvragen.length) { c.innerHTML='<div class="empty"><span style="font-size:48px;display:block;margin-bottom:12px">⏳</span><div style="font-size:15px;font-weight:700;margin-bottom:6px">Nog geen aanvragen</div><div style="font-size:13px">Koop iets uit de winkel!</div></div>'; return; }
+  c.innerHTML = aanvragen.map(a=>`
     <div class="request-card">
       <span class="req-emoji">${a.emoji}</span>
-      <div class="req-info"><div class="req-naam">${a.naam}</div><div class="req-meta">🪙${a.munten} · ${tg(a.datum)}</div></div>
-      ${a.status==='wacht'?`<div class="req-btns"><button class="btn-goed" onclick="beoordeel('${a.id}',true)">✓ Goedkeuren</button><button class="btn-af" onclick="beoordeel('${a.id}',false)">✗</button></div>`
-      :`<span class="req-badge ${a.status==='goed'?'badge-goed':'badge-af'}">${a.status==='goed'?'✓ Goedgekeurd':'✗ Afgewezen'}</span>`}
+      <div class="req-info"><div class="req-naam">${a.naam}</div><div class="req-meta">🪙${a.kosten_munten} · ${tg(a.aangevraagd_op)}</div></div>
+      ${a.status==='aangevraagd'?`<div class="req-btns"><button class="btn-goed" onclick="beoordeel('${a.id}',true,${a.kosten_munten})">✓ Goedkeuren</button><button class="btn-af" onclick="beoordeel('${a.id}',false,0)">✗</button></div>`
+      :`<span class="req-badge ${a.status==='goedgekeurd'?'badge-goed':'badge-af'}">${a.status==='goedgekeurd'?'✓ Goedgekeurd':'✗ Afgewezen'}</span>`}
     </div>`).join('');
 }
 
-function beoordeel(id, ok) {
-  const list = getAanvragen();
-  const idx = list.findIndex(a=>a.id===id); if (idx<0) return;
+async function beoordeel(id, ok, munten) {
+  await db.from('beloningen').update({ status: ok?'goedgekeurd':'afgewezen' }).eq('id',id);
   if (ok) {
-    huidigKind.munten = Math.max(0,(huidigKind.munten||0)-list[idx].munten);
-    document.getElementById('munten-val').textContent = huidigKind.munten;
-    const kids = JSON.parse(localStorage.getItem('kg_kinderen')||'[]');
-    const ki = kids.findIndex(k=>k.id===huidigKind.id);
-    if (ki>=0){kids[ki].munten=huidigKind.munten;localStorage.setItem('kg_kinderen',JSON.stringify(kids));}
-    toast(list[idx].emoji+' Goedgekeurd! 🪙'+list[idx].munten+' afgeschreven.','ok');
+    const nieuw = Math.max(0,(huidigKind.munten||0)-munten);
+    await db.from('kinderen').update({ munten: nieuw }).eq('id', huidigKind.id);
+    huidigKind.munten = nieuw;
+    document.getElementById('munten-val').textContent = nieuw;
+    toast('✓ Goedgekeurd! 🪙'+munten+' afgeschreven.','ok');
   } else { toast('Aanvraag afgewezen.'); }
-  list[idx].status = ok?'goed':'af';
-  localStorage.setItem('kg_aanv_'+huidigKind.id, JSON.stringify(list));
-  renderAanvragen(); renderWinkel();
+  await laadAanvragen(); renderWinkel();
 }
 
 function tg(iso) {
   if (!iso) return '';
-  const d = Math.floor((Date.now()-new Date(iso))/60000);
+  const d=Math.floor((Date.now()-new Date(iso))/60000);
   return d<2?'Zojuist':d<60?d+' min geleden':d<1440?Math.floor(d/60)+' uur geleden':new Date(iso).toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
 }
-
-function tab(t) {
-  document.getElementById('v-winkel').style.display=t==='winkel'?'block':'none';
-  document.getElementById('v-aanvragen').style.display=t==='aanvragen'?'block':'none';
-  document.getElementById('t-winkel').classList.toggle('active',t==='winkel');
-  document.getElementById('t-aanvragen').classList.toggle('active',t==='aanvragen');
-}
+function tab(t){document.getElementById('v-winkel').style.display=t==='winkel'?'block':'none';document.getElementById('v-aanvragen').style.display=t==='aanvragen'?'block':'none';document.getElementById('t-winkel').classList.toggle('active',t==='winkel');document.getElementById('t-aanvragen').classList.toggle('active',t==='aanvragen');}
 function kEmoji(el,e){document.querySelectorAll('.eo').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');gekozenEmoji=e;}
 function kMunten(el,v){document.querySelectorAll('.mo').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');gekozenMunten=v;document.getElementById('in-munten').value='';}
 function open_(id){document.getElementById(id).classList.add('open');}
 function sluit(id){document.getElementById(id).classList.remove('open');}
 function bsluit(e,id){if(e.target.id===id)sluit(id);}
 function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.className='toast',3000);}
+async function uitloggen(){await db.auth.signOut();window.location.href='login.html';}
 </script>
 </body>
 </html>
