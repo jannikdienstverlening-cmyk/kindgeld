@@ -46,6 +46,21 @@
     .verify-title { font-family: 'Baloo 2', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
     .verify-sub { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
     .btn-resend { background: transparent; border: none; color: var(--green); font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 16px; display: block; margin-left: auto; margin-right: auto; }
+
+    /* PIN SETUP */
+    .pin-dots { display: flex; gap: 14px; justify-content: center; margin: 20px 0; }
+    .pin-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--border); transition: all 0.2s; }
+    .pin-dot.filled { background: var(--green); transform: scale(1.1); }
+    .pin-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 8px; }
+    .pin-btn { background: var(--bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 16px; font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+    .pin-btn:hover { background: var(--green-light); border-color: var(--green); }
+    .pin-btn:active { transform: scale(0.95); }
+    .pin-step-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; }
+    .progress-bar { display: flex; gap: 6px; margin-bottom: 24px; }
+    .progress-step { flex: 1; height: 4px; border-radius: 2px; background: var(--border); }
+    .progress-step.done { background: var(--green); }
+    .progress-step.active { background: var(--green); opacity: 0.5; }
+
     @media (max-width: 480px) { nav { padding: 16px 20px; } .auth-card { padding: 28px 20px; } }
   </style>
 </head>
@@ -115,6 +130,42 @@
         <button class="btn-resend" onclick="opnieuwVersturen()">Mail niet ontvangen? Opnieuw versturen</button>
       </div>
     </div>
+
+    <!-- PIN INSTELLEN -->
+    <div id="scherm-pin" style="display:none">
+      <div class="progress-bar">
+        <div class="progress-step done"></div>
+        <div class="progress-step done"></div>
+        <div class="progress-step active"></div>
+      </div>
+      <div class="auth-icon">🔑</div>
+      <div class="auth-title">Stel je ouder-PIN in</div>
+      <div class="auth-sub" id="pin-instructie">Kies een 4-cijferige PIN. Hiermee open je het ouderdashboard — je kind ziet alleen de taken.</div>
+
+      <div class="pin-dots">
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+        <div class="pin-dot" id="pd4"></div>
+      </div>
+
+      <div class="pin-grid">
+        <button class="pin-btn" onclick="pinInput('1')">1</button>
+        <button class="pin-btn" onclick="pinInput('2')">2</button>
+        <button class="pin-btn" onclick="pinInput('3')">3</button>
+        <button class="pin-btn" onclick="pinInput('4')">4</button>
+        <button class="pin-btn" onclick="pinInput('5')">5</button>
+        <button class="pin-btn" onclick="pinInput('6')">6</button>
+        <button class="pin-btn" onclick="pinInput('7')">7</button>
+        <button class="pin-btn" onclick="pinInput('8')">8</button>
+        <button class="pin-btn" onclick="pinInput('9')">9</button>
+        <button class="pin-btn" onclick="pinOverslaan()" style="font-size:12px;color:var(--text-muted)">Overslaan</button>
+        <button class="pin-btn" onclick="pinInput('0')">0</button>
+        <button class="pin-btn" onclick="pinVerwijderen()" style="font-size:18px">⌫</button>
+      </div>
+
+      <div id="pin-fout" style="color:#991B1B;font-size:13px;font-weight:700;text-align:center;margin-top:8px;min-height:20px"></div>
+    </div>
   </div>
 </div>
 
@@ -181,9 +232,10 @@
         options: { data: { naam } }
       });
       if (error) throw error;
-      document.getElementById('verify-email-tonen').textContent = email;
-      document.getElementById('scherm-registreer').style.display = 'none';
-      document.getElementById('scherm-verificatie').style.display = 'block';
+      // Sla email op voor verificatie scherm
+      window._regEmail = email;
+      // Ga direct naar PIN instellen (geen email verificatie scherm eerst)
+      toonScherm('pin');
     } catch(e) {
       var msg = e.message || 'Er ging iets mis.';
       if (msg.includes('already registered')) msg = 'Dit e-mailadres is al in gebruik. Probeer in te loggen.';
@@ -191,6 +243,70 @@
     } finally {
       setLaden('btn-registreer', false, 'Account aanmaken →');
     }
+  }
+
+  // PIN LOGICA
+  var pinBuffer = '';
+  var pinBevestig = '';
+  var pinFase = 'invoer'; // 'invoer' of 'bevestig'
+  var PIN_KEY = 'kindgeld_ouder_pin';
+
+  function toonScherm(naam) {
+    ['registreer','login','verificatie','pin'].forEach(s => {
+      var el = document.getElementById('scherm-' + s);
+      if (el) el.style.display = s === naam ? 'block' : 'none';
+    });
+  }
+
+  function pinInput(cijfer) {
+    if (pinBuffer.length >= 4) return;
+    pinBuffer += cijfer;
+    updatePinDots();
+    if (pinBuffer.length === 4) {
+      setTimeout(verwerkPin, 200);
+    }
+  }
+
+  function pinVerwijderen() {
+    pinBuffer = pinBuffer.slice(0, -1);
+    updatePinDots();
+    document.getElementById('pin-fout').textContent = '';
+  }
+
+  function updatePinDots() {
+    for (var i = 1; i <= 4; i++) {
+      document.getElementById('pd' + i).classList.toggle('filled', i <= pinBuffer.length);
+    }
+  }
+
+  function verwerkPin() {
+    if (pinFase === 'invoer') {
+      // Eerste keer → bewaar en vraag bevestiging
+      pinBevestig = pinBuffer;
+      pinBuffer = '';
+      updatePinDots();
+      pinFase = 'bevestig';
+      document.getElementById('pin-instructie').textContent = 'Voer je PIN nogmaals in ter bevestiging';
+      document.getElementById('pin-fout').textContent = '';
+    } else {
+      // Bevestiging
+      if (pinBuffer === pinBevestig) {
+        localStorage.setItem(PIN_KEY, pinBuffer);
+        // Ga naar dashboard
+        window.location.href = 'dashboard.html';
+      } else {
+        document.getElementById('pin-fout').textContent = '❌ PINs komen niet overeen, probeer opnieuw';
+        pinBuffer = '';
+        pinFase = 'invoer';
+        document.getElementById('pin-instructie').textContent = 'Kies een 4-cijferige PIN voor het ouderdashboard';
+        updatePinDots();
+      }
+    }
+  }
+
+  function pinOverslaan() {
+    // Geen PIN instellen, direct naar dashboard
+    window.location.href = 'dashboard.html';
   }
 
   async function inloggen() {
