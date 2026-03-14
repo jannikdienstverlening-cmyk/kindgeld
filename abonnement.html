@@ -4,123 +4,418 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kindgeld — Kies je abonnement</title>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://js.stripe.com/v3/"></script>
+  <meta name="description" content="Begin gratis. Upgrade wanneer je wilt. Altijd opzegbaar — kies het Kindgeld-plan dat bij jouw gezin past.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #085041;
       --orange: #D85A30; --orange-light: #FAECE7;
       --amber: #EF9F27; --amber-light: #FAEEDA;
+      --red: #E24B4A; --red-light: #FEEBEB;
+      --purple: #7F77DD;
       --text: #1a1a1a; --text-muted: #6b7280;
-      --border: rgba(0,0,0,0.1); --bg: #FAFAF8; --white: #ffffff;
+      --border: rgba(0,0,0,0.09); --bg: #FAFAF8; --white: #ffffff;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-md: 0 8px 28px rgba(0,0,0,0.10);
+      --shadow-lg: 0 20px 56px rgba(0,0,0,0.14);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Nunito', sans-serif; background: var(--bg); min-height: 100vh; }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    /* ── ANIMATIES ── */
+    @keyframes float    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes popIn    { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+    @keyframes pulse    { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(.9)} }
+    @keyframes spin     { to{transform:rotate(360deg)} }
+    @keyframes fadeUp   { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes shimmer  { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+
+    /* ── ACHTERGROND ── */
     .bg-shapes { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-    .shape { position: absolute; border-radius: 50%; opacity: 0.06; }
-    .shape-1 { width: 500px; height: 500px; background: var(--green); top: -150px; right: -100px; }
-    .shape-2 { width: 300px; height: 300px; background: var(--amber); bottom: -50px; left: -80px; }
+    .shape { position: absolute; border-radius: 50%; }
+    .shape-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(29,158,117,0.10) 0%, transparent 70%); top: -200px; right: -150px; animation: float 10s ease-in-out infinite; }
+    .shape-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(239,159,39,0.08) 0%, transparent 70%); bottom: -100px; left: -100px; animation: float 13s ease-in-out infinite 2s; }
 
-    nav { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; max-width: 1100px; margin: 0 auto; }
+    /* ── NAV ── */
+    nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 40px; max-width: 1100px; margin: 0 auto;
+    }
     .logo { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; color: var(--orange); text-decoration: none; }
     .logo span { color: var(--green); }
-    .nav-login { font-size: 14px; font-weight: 700; color: var(--text-muted); text-decoration: none; }
-    .nav-login:hover { color: var(--green); }
+    .nav-login {
+      font-size: 14px; font-weight: 700; color: var(--text-muted);
+      text-decoration: none; padding: 8px 16px; border-radius: 10px;
+      transition: all 0.15s;
+    }
+    .nav-login:hover { color: var(--green); background: var(--green-light); }
 
-    main { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 20px 24px 80px; }
+    /* ── LAYOUT ── */
+    main { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 16px 24px 100px; }
 
-    .hero { text-align: center; margin-bottom: 52px; }
-    .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--green-light); border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 700; color: var(--green-dark); margin-bottom: 16px; }
-    .hero h1 { font-family: 'Baloo 2', sans-serif; font-size: 44px; font-weight: 800; color: var(--text); line-height: 1.15; margin-bottom: 12px; }
+    /* ── HERO ── */
+    .hero { text-align: center; margin-bottom: 44px; animation: fadeUp 0.6s ease both; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green-light); border: 1px solid rgba(29,158,117,0.2);
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 13px; font-weight: 700; color: var(--green-dark); margin-bottom: 18px;
+    }
+    .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.5s ease-in-out infinite; }
+    .hero h1 { font-family: 'Baloo 2', sans-serif; font-size: 46px; font-weight: 800; line-height: 1.15; margin-bottom: 14px; }
     .hero h1 span { color: var(--green); }
-    .hero p { font-size: 17px; color: var(--text-muted); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+    .hero p { font-size: 17px; color: var(--text-muted); max-width: 480px; margin: 0 auto; line-height: 1.7; }
 
-    /* BILLING TOGGLE */
-    .billing-toggle { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 40px; }
-    .billing-label { font-size: 14px; font-weight: 700; color: var(--text-muted); }
+    /* ── SOCIAL PROOF ── */
+    .social-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; margin-bottom: 36px; flex-wrap: wrap;
+      background: var(--white); border-radius: 20px;
+      border: 1px solid var(--border); padding: 4px;
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+    .social-item {
+      flex: 1; min-width: 120px; text-align: center; padding: 16px 12px;
+      border-right: 1px solid var(--border);
+    }
+    .social-item:last-child { border-right: none; }
+    .social-num { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; color: var(--green); line-height: 1; }
+    .social-lbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── BILLING TOGGLE ── */
+    .billing-toggle {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-bottom: 36px;
+      animation: fadeUp 0.6s ease 0.15s both;
+    }
+    .billing-label { font-size: 14px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
     .billing-label.active { color: var(--text); }
-    .toggle-switch { width: 48px; height: 26px; background: var(--green); border-radius: 13px; cursor: pointer; position: relative; transition: background 0.2s; }
-    .toggle-knob { width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-    .toggle-switch.monthly .toggle-knob { left: 3px; }
-    .toggle-switch.yearly .toggle-knob { left: 25px; }
-    .save-badge { background: var(--amber); color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 20px; }
+    .toggle-track {
+      width: 52px; height: 28px; background: var(--border);
+      border-radius: 14px; cursor: pointer; position: relative;
+      transition: background 0.25s;
+    }
+    .toggle-track.on { background: var(--green); }
+    .toggle-knob {
+      width: 22px; height: 22px; background: white; border-radius: 50%;
+      position: absolute; top: 3px; left: 3px;
+      transition: left 0.25s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+    .toggle-track.on .toggle-knob { left: 27px; }
+    .save-badge {
+      background: linear-gradient(135deg, var(--amber), var(--orange));
+      color: white; font-size: 11px; font-weight: 800;
+      padding: 4px 10px; border-radius: 20px; letter-spacing: 0.2px;
+    }
 
-    /* PLANS */
-    .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 48px; }
-    .plan-card { background: var(--white); border-radius: 24px; padding: 28px; border: 1.5px solid var(--border); position: relative; transition: transform 0.2s, box-shadow 0.2s; }
-    .plan-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
-    .plan-card.featured { border-color: var(--green); border-width: 2px; }
-    .featured-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--green); color: white; font-size: 11px; font-weight: 800; padding: 4px 16px; border-radius: 20px; white-space: nowrap; }
-    .plan-icon { font-size: 36px; margin-bottom: 12px; display: block; }
-    .plan-name { font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-    .plan-tagline { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
-    .plan-price-wrap { margin-bottom: 20px; }
-    .plan-price { font-family: 'Baloo 2', sans-serif; font-size: 42px; font-weight: 800; color: var(--text); line-height: 1; }
-    .plan-price sup { font-size: 20px; font-weight: 700; vertical-align: top; margin-top: 8px; }
-    .plan-price sub { font-size: 14px; font-weight: 600; color: var(--text-muted); }
-    .plan-price-orig { font-size: 13px; color: var(--text-muted); text-decoration: line-through; margin-top: 2px; }
-    .plan-features { list-style: none; margin-bottom: 24px; display: flex; flex-direction: column; gap: 9px; }
-    .plan-features li { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--text); }
-    .feat-check { color: var(--green); font-weight: 800; flex-shrink: 0; margin-top: 1px; }
-    .feat-cross { color: #ccc; flex-shrink: 0; }
+    /* ── PLANNEN GRID ── */
+    .plans-grid {
+      display: grid; grid-template-columns: 1fr 1.08fr 1fr;
+      gap: 16px; margin-bottom: 56px; align-items: start;
+      animation: fadeUp 0.6s ease 0.2s both;
+    }
 
-    .btn-plan { width: 100%; padding: 13px; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer; border: none; transition: all 0.2s; }
-    .btn-plan-green { background: var(--green); color: white; }
-    .btn-plan-green:hover { background: var(--green-dark); }
-    .btn-plan-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
-    .btn-plan-outline:hover { background: var(--bg); }
-    .btn-plan:disabled { opacity: 0.7; cursor: wait; }
+    .plan-card {
+      background: var(--white); border-radius: 24px;
+      padding: 28px 24px 24px;
+      border: 1.5px solid var(--border);
+      position: relative; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 
-    /* LOADING SPINNER */
-    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    /* FEATURED (GEZIN) */
+    .plan-card.featured {
+      border: 2.5px solid var(--green);
+      box-shadow: 0 0 0 4px rgba(29,158,117,0.08), var(--shadow-md);
+      padding-top: 36px;
+    }
+    .plan-card.featured:hover { transform: translateY(-6px); box-shadow: 0 0 0 4px rgba(29,158,117,0.12), var(--shadow-lg); }
 
-    /* FEATURES TABLE */
-    .features-section { margin-bottom: 48px; }
-    .features-title { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); text-align: center; margin-bottom: 24px; }
-    .features-table { background: var(--white); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
-    .feat-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); }
-    .feat-row:last-child { border-bottom: none; }
-    .feat-row.header { background: var(--bg); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
-    .feat-row.header .feat-col:not(:first-child) { text-align: center; }
-    .feat-col { font-size: 13px; color: var(--text); }
-    .feat-col:not(:first-child) { text-align: center; font-size: 16px; }
-    .feat-label { font-weight: 600; }
-    .feat-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .featured-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      color: white; font-size: 12px; font-weight: 800;
+      padding: 5px 18px; border-radius: 20px; white-space: nowrap;
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 12px rgba(29,158,117,0.35);
+    }
+    .featured-badge-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--amber); animation: pulse 1.4s ease-in-out infinite;
+    }
 
-    /* FAQ */
-    .faq-section { max-width: 640px; margin: 0 auto 48px; }
-    .faq-title { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); text-align: center; margin-bottom: 24px; }
-    .faq-item { background: var(--white); border-radius: 14px; padding: 16px 20px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
-    .faq-q { font-size: 14px; font-weight: 700; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
-    .faq-a { font-size: 13px; color: var(--text-muted); margin-top: 10px; line-height: 1.6; display: none; }
-    .faq-item.open .faq-a { display: block; }
-    .faq-arrow { transition: transform 0.2s; color: var(--text-muted); }
-    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .plan-icon { font-size: 38px; margin-bottom: 12px; display: block; }
+    .plan-name { font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 2px; }
+    .plan-tagline { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4; }
 
-    /* SOCIAL PROOF */
-    .social-row { display: flex; align-items: center; justify-content: center; gap: 32px; margin-bottom: 40px; flex-wrap: wrap; }
-    .social-item { text-align: center; }
-    .social-num { font-family: 'Baloo 2', sans-serif; font-size: 28px; font-weight: 800; color: var(--green); }
-    .social-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    /* PRIJS */
+    .plan-price-wrap { margin-bottom: 8px; }
+    .price-row { display: flex; align-items: baseline; gap: 2px; }
+    .price-currency { font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); margin-top: 6px; }
+    .price-amount { font-family: 'Baloo 2', sans-serif; font-size: 54px; font-weight: 800; color: var(--text); line-height: 1; }
+    .plan-card.featured .price-amount { color: var(--green-dark); }
+    .price-period { font-size: 15px; font-weight: 600; color: var(--text-muted); align-self: flex-end; margin-bottom: 6px; }
+    .price-orig { font-size: 13px; color: var(--text-muted); text-decoration: line-through; margin-top: 2px; }
+    .price-note { font-size: 13px; font-weight: 700; margin-top: 4px; margin-bottom: 20px; }
+    .price-note.green { color: var(--green); }
+    .price-note.muted { color: var(--text-muted); }
 
-    /* SUCCESS */
-    .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+    /* FEATURES LIJST */
+    .plan-features { list-style: none; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 9px; font-size: 14px; line-height: 1.4; }
+    .feat-check { color: var(--green); font-weight: 800; flex-shrink: 0; margin-top: 1px; font-size: 15px; }
+    .feat-cross {
+      flex-shrink: 0; margin-top: 1px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--red-light); color: var(--red);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900; line-height: 1;
+    }
+    .feat-cross-text { color: var(--text-muted); }
+
+    /* CTA KNOPPEN */
+    .btn-plan {
+      width: 100%; padding: 14px; border-radius: 14px;
+      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800;
+      cursor: pointer; border: none; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-plan:active { transform: scale(0.98); }
+    .btn-plan:disabled { opacity: 0.65; cursor: wait; }
+
+    .btn-gratis {
+      background: var(--bg); color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-gratis:hover { background: #F0F0EC; }
+
+    .btn-gezin {
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+      color: white; padding: 16px;
+      box-shadow: 0 6px 20px rgba(29,158,117,0.35);
+      font-size: 16px;
+    }
+    .btn-gezin:hover { box-shadow: 0 8px 28px rgba(29,158,117,0.45); filter: brightness(1.05); }
+
+    .btn-jaar {
+      background: var(--white); color: var(--green);
+      border: 2px solid var(--green);
+    }
+    .btn-jaar:hover { background: var(--green-light); }
+
+    /* OVERTUIGENDE ZIN */
+    .plan-pitch {
+      text-align: center; font-size: 12px; font-weight: 600;
+      color: var(--text-muted); margin-top: 10px; line-height: 1.4;
+    }
+    .plan-card.featured .plan-pitch { color: var(--green-dark); }
+
+    /* SPINNER */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4); border-top-color: white;
+      border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+    .spinner.dark { border-color: rgba(0,0,0,0.15); border-top-color: var(--green); }
+
+    /* ── VERGELIJKINGSTABEL ── */
+    .features-section { margin-bottom: 56px; animation: fadeUp 0.6s ease 0.3s both; }
+    .features-title {
+      font-family: 'Baloo 2', sans-serif; font-size: 28px; font-weight: 800;
+      text-align: center; margin-bottom: 8px;
+    }
+    .features-subtitle { text-align: center; font-size: 15px; color: var(--text-muted); margin-bottom: 28px; }
+
+    .features-table {
+      background: var(--white); border-radius: 24px;
+      overflow: hidden; border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* TABEL HEADER */
+    .tbl-header {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      background: var(--bg); border-bottom: 2px solid var(--border);
+    }
+    .tbl-hcol {
+      padding: 16px 14px; font-size: 12px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted);
+      text-align: center;
+    }
+    .tbl-hcol:first-child { text-align: left; }
+    .tbl-hcol.gezin-col {
+      background: rgba(29,158,117,0.07);
+      color: var(--green-dark); border-left: 2px solid rgba(29,158,117,0.2);
+      border-right: 2px solid rgba(29,158,117,0.2);
+      position: relative;
+    }
+    .tbl-hcol.gezin-col::after {
+      content: '⭐';
+      display: block; font-size: 14px; margin-top: 2px; letter-spacing: 0;
+    }
+
+    /* TABEL RIJEN */
+    .tbl-row {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      align-items: center; border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .tbl-row:last-child { border-bottom: none; }
+    .tbl-row:hover { background: rgba(0,0,0,0.015); }
+    .tbl-row.stripe { background: rgba(0,0,0,0.018); }
+    .tbl-row.stripe:hover { background: rgba(0,0,0,0.03); }
+
+    .tbl-col { padding: 14px 14px; font-size: 13px; color: var(--text); }
+    .tbl-col:not(:first-child) { text-align: center; }
+    .tbl-col.gezin-col {
+      background: rgba(29,158,117,0.045);
+      border-left: 2px solid rgba(29,158,117,0.15);
+      border-right: 2px solid rgba(29,158,117,0.15);
+    }
+    .tbl-row.stripe .tbl-col.gezin-col { background: rgba(29,158,117,0.07); }
+    .tbl-label { font-weight: 700; font-size: 13px; }
+    .tbl-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .tbl-val-green { font-weight: 800; color: var(--green); font-size: 15px; }
+    .tbl-val-bold { font-weight: 800; }
+
+    /* Kruis symbool in tabel */
+    .tbl-cross {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--red-light); color: var(--red);
+      font-size: 11px; font-weight: 900;
+    }
+    .tbl-check { color: var(--green); font-size: 18px; font-weight: 800; }
+    .tbl-dash { color: var(--text-muted); font-size: 16px; }
+
+    /* CTA IN TABEL FOOTER */
+    .tbl-footer {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      border-top: 2px solid var(--border); background: var(--bg);
+    }
+    .tbl-footer-col { padding: 16px 14px; text-align: center; }
+    .tbl-footer-col:first-child { text-align: left; display: flex; align-items: center; font-size: 13px; font-weight: 700; color: var(--text-muted); }
+    .tbl-footer-col.gezin-col {
+      background: rgba(29,158,117,0.07);
+      border-left: 2px solid rgba(29,158,117,0.2);
+      border-right: 2px solid rgba(29,158,117,0.2);
+    }
+    .btn-tbl {
+      width: 100%; padding: 10px 8px; border-radius: 11px;
+      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+      cursor: pointer; border: none; transition: all 0.2s;
+    }
+    .btn-tbl-gratis { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-tbl-gratis:hover { background: #EFEFEB; }
+    .btn-tbl-gezin { background: var(--green); color: white; box-shadow: 0 3px 10px rgba(29,158,117,0.3); }
+    .btn-tbl-gezin:hover { background: var(--green-dark); }
+    .btn-tbl-jaar { background: var(--white); color: var(--green); border: 1.5px solid var(--green); }
+    .btn-tbl-jaar:hover { background: var(--green-light); }
+
+    /* ── FAQ ── */
+    .faq-section { max-width: 640px; margin: 0 auto 56px; animation: fadeUp 0.6s ease 0.35s both; }
+    .faq-title { font-family: 'Baloo 2', sans-serif; font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 8px; }
+    .faq-subtitle { text-align: center; font-size: 15px; color: var(--text-muted); margin-bottom: 28px; }
+    .faq-item {
+      background: var(--white); border-radius: 16px;
+      padding: 0; margin-bottom: 10px; border: 1px solid var(--border);
+      overflow: hidden; transition: box-shadow 0.2s;
+    }
+    .faq-item:hover { box-shadow: var(--shadow-sm); }
+    .faq-q {
+      font-size: 14px; font-weight: 700; color: var(--text);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 20px; cursor: pointer; gap: 12px;
+      user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+    .faq-arrow {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--bg); display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text-muted); flex-shrink: 0;
+      transition: transform 0.25s, background 0.2s;
+    }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); background: var(--green-light); color: var(--green); }
+    .faq-a {
+      font-size: 14px; color: var(--text-muted); line-height: 1.7;
+      padding: 0 20px; max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding: 0 20px 16px; }
+
+    /* ── SUCCESS OVERLAY ── */
+    .success-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 200;
+      align-items: center; justify-content: center; padding: 20px;
+      backdrop-filter: blur(4px);
+    }
     .success-overlay.show { display: flex; }
-    .success-box { background: white; border-radius: 28px; padding: 48px 36px; text-align: center; max-width: 420px; margin: 20px; animation: popIn 0.4s ease; }
-    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .success-icon { font-size: 64px; margin-bottom: 16px; }
+    .success-box {
+      background: white; border-radius: 28px; padding: 48px 36px;
+      text-align: center; max-width: 420px; width: 100%;
+      animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    }
+    .success-icon { font-size: 64px; margin-bottom: 16px; display: block; animation: float 3s ease-in-out infinite; }
     .success-title { font-family: 'Baloo 2', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 8px; }
-    .success-sub { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px; }
-    .btn-success { width: 100%; padding: 14px; background: var(--green); color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; }
+    .success-sub { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 28px; }
+    .btn-success {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      color: white; border: none; border-radius: 14px;
+      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(29,158,117,0.3);
+    }
+    .btn-success:hover { filter: brightness(1.05); box-shadow: 0 6px 20px rgba(29,158,117,0.4); }
 
-    @media (max-width: 768px) {
-      .plans-grid { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 32px; }
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px);
+      background: var(--text); color: white; padding: 12px 24px; border-radius: 14px;
+      font-size: 14px; font-weight: 700; z-index: 300; opacity: 0;
+      transition: all 0.3s; white-space: nowrap; pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--red); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 840px) {
+      .plans-grid { grid-template-columns: 1fr; max-width: 440px; margin-left: auto; margin-right: auto; }
+      .plan-card.featured { transform: none; }
+      .plan-card.featured:hover { transform: translateY(-4px); }
       nav { padding: 16px 20px; }
-      .feat-row { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
-      .social-row { gap: 20px; }
+      .hero h1 { font-size: 34px; }
+      .social-row { border-radius: 16px; }
+      .social-item { min-width: 100px; padding: 12px 8px; }
+      .social-num { font-size: 22px; }
+    }
+
+    @media (max-width: 640px) {
+      main { padding: 8px 16px 80px; }
+      .hero { margin-bottom: 28px; }
+      .hero h1 { font-size: 30px; }
+      .hero p { font-size: 15px; }
+
+      /* Tabel scrollbaar op mobiel */
+      .features-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 20px; }
+      .features-table { min-width: 520px; border-radius: 20px; }
+      .tbl-header, .tbl-row, .tbl-footer { grid-template-columns: 1.8fr 1fr 1fr 1fr; }
+
+      .faq-section { margin-bottom: 40px; }
+    }
+
+    @media (max-width: 420px) {
+      .social-item { border-right: none; border-bottom: 1px solid var(--border); width: 50%; }
+      .social-item:nth-child(even) { border-right: none; }
+      .social-row { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -131,85 +426,115 @@
   <div class="shape shape-2"></div>
 </div>
 
+<!-- NAV -->
 <nav>
   <a href="index.html" class="logo">Kind<span>geld</span></a>
-  <a href="index.html" class="nav-login">Al een account? Inloggen →</a>
+  <a href="login.html" class="nav-login">Al een account? Inloggen →</a>
 </nav>
 
 <main>
 
   <!-- HERO -->
   <div class="hero">
-    <div class="hero-badge">🐷 Leer je kind slim sparen</div>
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      🐷 Al 2.400+ gezinnen gingen je voor
+    </div>
     <h1>Kies het plan dat bij<br>jouw <span>gezin</span> past</h1>
     <p>Begin gratis. Upgrade wanneer je wilt. Altijd opzegbaar — geen gedoe.</p>
   </div>
 
   <!-- SOCIAL PROOF -->
   <div class="social-row">
-    <div class="social-item"><div class="social-num">2.400+</div><div class="social-lbl">Gezinnen actief</div></div>
-    <div class="social-item"><div class="social-num">⭐ 4,9</div><div class="social-lbl">Gemiddelde beoordeling</div></div>
-    <div class="social-item"><div class="social-num">€0</div><div class="social-lbl">Om te starten</div></div>
-    <div class="social-item"><div class="social-num">30 dagen</div><div class="social-lbl">Geld-terug garantie</div></div>
+    <div class="social-item">
+      <div class="social-num">2.400+</div>
+      <div class="social-lbl">Gezinnen actief</div>
+    </div>
+    <div class="social-item">
+      <div class="social-num">⭐ 4,9</div>
+      <div class="social-lbl">Beoordeling</div>
+    </div>
+    <div class="social-item">
+      <div class="social-num">€0</div>
+      <div class="social-lbl">Om te starten</div>
+    </div>
+    <div class="social-item">
+      <div class="social-num">30 dagen</div>
+      <div class="social-lbl">Garantie</div>
+    </div>
   </div>
 
   <!-- BILLING TOGGLE -->
   <div class="billing-toggle">
-    <span class="billing-label active" id="lbl-monthly">Maandelijks</span>
-    <div class="toggle-switch monthly" id="billing-toggle" onclick="toggleBilling()">
+    <span class="billing-label active" id="lbl-monthly" onclick="setBilling(false)">Maandelijks</span>
+    <div class="toggle-track" id="billing-toggle" onclick="toggleBilling()" role="switch" aria-checked="false">
       <div class="toggle-knob"></div>
     </div>
-    <span class="billing-label" id="lbl-yearly">Jaarlijks</span>
+    <span class="billing-label" id="lbl-yearly" onclick="setBilling(true)">Jaarlijks</span>
     <span class="save-badge">Bespaar 33%</span>
   </div>
 
-  <!-- PLANS -->
+  <!-- PLANNEN -->
   <div class="plans-grid">
 
-    <!-- FREE -->
+    <!-- GRATIS -->
     <div class="plan-card">
       <span class="plan-icon">🌱</span>
       <div class="plan-name">Gratis</div>
       <div class="plan-tagline">Kennismaken met Kindgeld</div>
       <div class="plan-price-wrap">
-        <div class="plan-price"><sup>€</sup>0</div>
-        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">Voor altijd gratis</div>
+        <div class="price-row">
+          <span class="price-currency">€</span>
+          <span class="price-amount">0</span>
+        </div>
+        <div class="price-note muted">Voor altijd gratis, geen kaart nodig</div>
       </div>
       <ul class="plan-features">
         <li><span class="feat-check">✓</span> 1 kindprofiel</li>
         <li><span class="feat-check">✓</span> 1 spaardoel tegelijk</li>
-        <li><span class="feat-check">✓</span> Basis uitdagingen</li>
+        <li><span class="feat-check">✓</span> Basis uitdagingen (3 per week)</li>
         <li><span class="feat-check">✓</span> Spaarsaldo bijhouden</li>
-        <li><span class="feat-cross">✗</span> <span style="color:var(--text-muted)">Meerdere kinderen</span></li>
-        <li><span class="feat-cross">✗</span> <span style="color:var(--text-muted)">Beloningenwinkel</span></li>
-        <li><span class="feat-cross">✗</span> <span style="color:var(--text-muted)">Automatisch zakgeld</span></li>
+        <li><span class="feat-cross">✕</span> <span class="feat-cross-text">Meerdere kinderen</span></li>
+        <li><span class="feat-cross">✕</span> <span class="feat-cross-text">Beloningenwinkel</span></li>
+        <li><span class="feat-cross">✕</span> <span class="feat-cross-text">Automatisch zakgeld</span></li>
       </ul>
-      <button class="btn-plan btn-plan-outline" onclick="window.location.href='index.html'">Gratis beginnen</button>
+      <button class="btn-plan btn-gratis" onclick="window.location.href='login.html'">
+        Gratis beginnen
+      </button>
+      <div class="plan-pitch">Geen creditcard nodig · direct aan de slag</div>
     </div>
 
     <!-- GEZIN (FEATURED) -->
     <div class="plan-card featured">
-      <div class="featured-badge">⭐ Meest gekozen</div>
+      <div class="featured-badge">
+        <span class="featured-badge-dot"></span>
+        Meest populair
+      </div>
       <span class="plan-icon">🏠</span>
       <div class="plan-name">Gezin</div>
-      <div class="plan-tagline">Voor gezinnen met 1-4 kinderen</div>
+      <div class="plan-tagline">Voor gezinnen met 1–4 kinderen</div>
       <div class="plan-price-wrap">
-        <div class="plan-price" id="gezin-price"><sup>€</sup>4<sub>,95/mnd</sub></div>
-        <div class="plan-price-orig" id="gezin-orig" style="display:none">€4,95/mnd</div>
-        <div style="font-size:13px;color:var(--text-muted);margin-top:4px" id="gezin-sub">Eerste maand gratis</div>
+        <div class="price-row">
+          <span class="price-currency">€</span>
+          <span class="price-amount" id="gezin-price-num">4</span>
+          <span class="price-period" id="gezin-price-dec">,95/mnd</span>
+        </div>
+        <div class="price-orig" id="gezin-orig" style="display:none">Normaal €4,95/mnd</div>
+        <div class="price-note green" id="gezin-sub">🎁 Eerste maand gratis</div>
       </div>
       <ul class="plan-features">
         <li><span class="feat-check">✓</span> Tot 4 kindprofielen</li>
         <li><span class="feat-check">✓</span> Onbeperkt spaardoelen</li>
-        <li><span class="feat-check">✓</span> Wekelijkse uitdagingen</li>
+        <li><span class="feat-check">✓</span> Onbeperkt uitdagingen</li>
         <li><span class="feat-check">✓</span> Beloningenwinkel</li>
         <li><span class="feat-check">✓</span> Automatisch zakgeld</li>
         <li><span class="feat-check">✓</span> Ouderportaal + goedkeuringen</li>
         <li><span class="feat-check">✓</span> Badges & statistieken</li>
       </ul>
-      <button class="btn-plan btn-plan-green" id="btn-gezin" onclick="startCheckout('gezin')">
-        Starten — eerste maand gratis
+      <button class="btn-plan btn-gezin" id="btn-gezin" onclick="startCheckout('gezin')">
+        Starten — eerste maand gratis →
       </button>
+      <div class="plan-pitch">✓ Geen kosten de eerste maand · daarna opzegbaar</div>
     </div>
 
     <!-- JAAR -->
@@ -218,8 +543,12 @@
       <div class="plan-name">Jaar</div>
       <div class="plan-tagline">Beste prijs, alles inbegrepen</div>
       <div class="plan-price-wrap">
-        <div class="plan-price" id="jaar-price"><sup>€</sup>3<sub>,29/mnd</sub></div>
-        <div style="font-size:13px;color:var(--green);font-weight:700;margin-top:4px" id="jaar-sub">€39/jaar · bespaar €20</div>
+        <div class="price-row">
+          <span class="price-currency">€</span>
+          <span class="price-amount" id="jaar-price-num">3</span>
+          <span class="price-period" id="jaar-price-dec">,29/mnd</span>
+        </div>
+        <div class="price-note green" id="jaar-sub">€39/jaar · bespaar €20</div>
       </div>
       <ul class="plan-features">
         <li><span class="feat-check">✓</span> Alles uit Gezin</li>
@@ -230,101 +559,170 @@
         <li><span class="feat-check">✓</span> Verjaardags-bonus munten</li>
         <li><span class="feat-check">✓</span> 30 dagen geld-terug garantie</li>
       </ul>
-      <button class="btn-plan btn-plan-outline" id="btn-jaar" onclick="startCheckout('jaar')" style="border-color:var(--green);color:var(--green)">
-        Jaarplan kiezen
+      <button class="btn-plan btn-jaar" id="btn-jaar" onclick="startCheckout('jaar')">
+        Jaarplan kiezen — bespaar €20
       </button>
+      <div class="plan-pitch">30 dagen geld-terug garantie · geen risico</div>
     </div>
+
   </div>
 
-  <!-- FEATURES TABLE -->
+  <!-- VERGELIJKINGSTABEL -->
   <div class="features-section">
     <div class="features-title">Wat zit er precies in?</div>
-    <div class="features-table">
-      <div class="feat-row header">
-        <div class="feat-col">Functie</div>
-        <div class="feat-col">Gratis</div>
-        <div class="feat-col" style="color:var(--green)">Gezin</div>
-        <div class="feat-col">Jaar</div>
-      </div>
-      <div class="feat-row">
-        <div class="feat-col"><div class="feat-label">Kindprofielen</div></div>
-        <div class="feat-col">1</div>
-        <div class="feat-col" style="font-weight:700;color:var(--green)">4</div>
-        <div class="feat-col" style="font-weight:700">6</div>
-      </div>
-      <div class="feat-row" style="background:var(--bg)">
-        <div class="feat-col"><div class="feat-label">Spaardoelen</div><div class="feat-sub">Hoeveel doelen per kind</div></div>
-        <div class="feat-col">1</div>
-        <div class="feat-col" style="color:var(--green)">∞</div>
-        <div class="feat-col">∞</div>
-      </div>
-      <div class="feat-row">
-        <div class="feat-col"><div class="feat-label">Wekelijkse uitdagingen</div></div>
-        <div class="feat-col">3</div>
-        <div class="feat-col" style="color:var(--green)">∞</div>
-        <div class="feat-col">∞</div>
-      </div>
-      <div class="feat-row" style="background:var(--bg)">
-        <div class="feat-col"><div class="feat-label">Beloningenwinkel</div></div>
-        <div class="feat-col">✗</div>
-        <div class="feat-col">✅</div>
-        <div class="feat-col">✅</div>
-      </div>
-      <div class="feat-row">
-        <div class="feat-col"><div class="feat-label">Automatisch zakgeld</div></div>
-        <div class="feat-col">✗</div>
-        <div class="feat-col">✅</div>
-        <div class="feat-col">✅</div>
-      </div>
-      <div class="feat-row" style="background:var(--bg)">
-        <div class="feat-col"><div class="feat-label">Ouder goedkeuringen</div></div>
-        <div class="feat-col">✗</div>
-        <div class="feat-col">✅</div>
-        <div class="feat-col">✅</div>
-      </div>
-      <div class="feat-row">
-        <div class="feat-col"><div class="feat-label">Badges & statistieken</div></div>
-        <div class="feat-col">✗</div>
-        <div class="feat-col">✅</div>
-        <div class="feat-col">✅</div>
-      </div>
-      <div class="feat-row" style="background:var(--bg)">
-        <div class="feat-col"><div class="feat-label">Prioriteit support</div></div>
-        <div class="feat-col">✗</div>
-        <div class="feat-col">✗</div>
-        <div class="feat-col">✅</div>
-      </div>
-      <div class="feat-row">
-        <div class="feat-col"><div class="feat-label">Geld-terug garantie</div></div>
-        <div class="feat-col">—</div>
-        <div class="feat-col">14 dagen</div>
-        <div class="feat-col" style="color:var(--green);font-weight:700">30 dagen</div>
+    <div class="features-subtitle">Vergelijk alle functies op een rij</div>
+    <div class="features-table-wrap">
+      <div class="features-table">
+
+        <!-- HEADER -->
+        <div class="tbl-header">
+          <div class="tbl-hcol" style="text-align:left">Functie</div>
+          <div class="tbl-hcol">Gratis</div>
+          <div class="tbl-hcol gezin-col">Gezin</div>
+          <div class="tbl-hcol">Jaar</div>
+        </div>
+
+        <!-- RIJEN -->
+        <div class="tbl-row">
+          <div class="tbl-col"><div class="tbl-label">Kindprofielen</div></div>
+          <div class="tbl-col">1</div>
+          <div class="tbl-col gezin-col"><span class="tbl-val-green">4</span></div>
+          <div class="tbl-col"><span class="tbl-val-bold">6</span></div>
+        </div>
+
+        <div class="tbl-row stripe">
+          <div class="tbl-col">
+            <div class="tbl-label">Spaardoelen</div>
+            <div class="tbl-sub">Per kind, tegelijk actief</div>
+          </div>
+          <div class="tbl-col">1</div>
+          <div class="tbl-col gezin-col"><span class="tbl-val-green">∞</span></div>
+          <div class="tbl-col"><span class="tbl-val-bold">∞</span></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="tbl-col">
+            <div class="tbl-label">Uitdagingen</div>
+            <div class="tbl-sub">Taken per week</div>
+          </div>
+          <div class="tbl-col">3</div>
+          <div class="tbl-col gezin-col"><span class="tbl-val-green">∞</span></div>
+          <div class="tbl-col"><span class="tbl-val-bold">∞</span></div>
+        </div>
+
+        <div class="tbl-row stripe">
+          <div class="tbl-col"><div class="tbl-label">Beloningenwinkel</div></div>
+          <div class="tbl-col"><span class="tbl-cross">✕</span></div>
+          <div class="tbl-col gezin-col"><span class="tbl-check">✓</span></div>
+          <div class="tbl-col"><span class="tbl-check">✓</span></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="tbl-col"><div class="tbl-label">Automatisch zakgeld</div></div>
+          <div class="tbl-col"><span class="tbl-cross">✕</span></div>
+          <div class="tbl-col gezin-col"><span class="tbl-check">✓</span></div>
+          <div class="tbl-col"><span class="tbl-check">✓</span></div>
+        </div>
+
+        <div class="tbl-row stripe">
+          <div class="tbl-col"><div class="tbl-label">Ouder goedkeuringen</div></div>
+          <div class="tbl-col"><span class="tbl-cross">✕</span></div>
+          <div class="tbl-col gezin-col"><span class="tbl-check">✓</span></div>
+          <div class="tbl-col"><span class="tbl-check">✓</span></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="tbl-col"><div class="tbl-label">Badges & statistieken</div></div>
+          <div class="tbl-col"><span class="tbl-cross">✕</span></div>
+          <div class="tbl-col gezin-col"><span class="tbl-check">✓</span></div>
+          <div class="tbl-col"><span class="tbl-check">✓</span></div>
+        </div>
+
+        <div class="tbl-row stripe">
+          <div class="tbl-col"><div class="tbl-label">Prioriteit support</div></div>
+          <div class="tbl-col"><span class="tbl-cross">✕</span></div>
+          <div class="tbl-col gezin-col"><span class="tbl-cross">✕</span></div>
+          <div class="tbl-col"><span class="tbl-check">✓</span></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="tbl-col">
+            <div class="tbl-label">Geld-terug garantie</div>
+          </div>
+          <div class="tbl-col"><span class="tbl-dash">—</span></div>
+          <div class="tbl-col gezin-col" style="font-weight:700;color:var(--green)">14 dagen</div>
+          <div class="tbl-col" style="font-weight:700;color:var(--green)">30 dagen</div>
+        </div>
+
+        <!-- FOOTER MET CTA -->
+        <div class="tbl-footer">
+          <div class="tbl-footer-col">Klaar om te beginnen?</div>
+          <div class="tbl-footer-col">
+            <button class="btn-tbl btn-tbl-gratis" onclick="window.location.href='login.html'">Gratis starten</button>
+          </div>
+          <div class="tbl-footer-col gezin-col">
+            <button class="btn-tbl btn-tbl-gezin" onclick="startCheckout('gezin')">Gezin kiezen</button>
+          </div>
+          <div class="tbl-footer-col">
+            <button class="btn-tbl btn-tbl-jaar" onclick="startCheckout('jaar')">Jaar kiezen</button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
   <!-- FAQ -->
   <div class="faq-section">
-    <div class="faq-title">Veel gestelde vragen</div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Kan ik altijd opzeggen? <span class="faq-arrow">▾</span></div>
+    <div class="faq-title">Veelgestelde vragen</div>
+    <div class="faq-subtitle">Alles wat je wil weten voor je start</div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this.parentElement)">
+        Kan ik altijd opzeggen?
+        <span class="faq-arrow">▾</span>
+      </div>
       <div class="faq-a">Ja, je kunt op elk moment opzeggen — zonder kosten en zonder gedoe. Je behoudt toegang tot het einde van je betaalperiode.</div>
     </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Hoe werkt de eerste maand gratis? <span class="faq-arrow">▾</span></div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this.parentElement)">
+        Hoe werkt de eerste maand gratis?
+        <span class="faq-arrow">▾</span>
+      </div>
       <div class="faq-a">Je vult je betaalgegevens in via Stripe (onze beveiligde betaalprovider), maar de eerste maand wordt niet afgeschreven. Daarna €4,95/maand — je kunt opzeggen voor de eerste factuur.</div>
     </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Is betalen veilig? <span class="faq-arrow">▾</span></div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this.parentElement)">
+        Is betalen veilig?
+        <span class="faq-arrow">▾</span>
+      </div>
       <div class="faq-a">Absoluut. We gebruiken Stripe — dezelfde betaaltechnologie als grote webshops. Wij zien je kaartgegevens nooit. Stripe verwerkt alles versleuteld en veilig.</div>
     </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Kan ik later upgraden of downgraden? <span class="faq-arrow">▾</span></div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this.parentElement)">
+        Kan ik later upgraden of downgraden?
+        <span class="faq-arrow">▾</span>
+      </div>
       <div class="faq-a">Ja, je kunt op elk moment wisselen van plan. Bij upgrade betaal je alleen het verschil voor de resterende periode. Bij downgrade krijg je tegoed.</div>
     </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Werkt het op telefoon en tablet? <span class="faq-arrow">▾</span></div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this.parentElement)">
+        Werkt het op telefoon en tablet?
+        <span class="faq-arrow">▾</span>
+      </div>
       <div class="faq-a">Ja! Kindgeld werkt op elk apparaat — smartphone, tablet en computer. Je kunt hem ook op je homescreen zetten als app.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this.parentElement)">
+        Wat gebeurt er met mijn data als ik opzeg?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a">Je data blijft bewaard. Als je je account verwijdert, worden alle gegevens na 30 dagen permanent gewist conform de AVG.</div>
     </div>
   </div>
 
@@ -333,114 +731,146 @@
 <!-- SUCCESS OVERLAY -->
 <div class="success-overlay" id="success-overlay">
   <div class="success-box">
-    <div class="success-icon">🎉</div>
-    <div class="success-title">Betaling gelukt!</div>
-    <div class="success-sub">Welkom bij Kindgeld Premium! Je account is direct actief. Ga nu je eerste kindprofiel aanmaken.</div>
-    <button class="btn-success" onclick="window.location.href='profiel-aanmaken.html'">Ga naar de app →</button>
+    <span class="success-icon">🎉</span>
+    <div class="success-title" id="success-title">Betaling gelukt!</div>
+    <div class="success-sub" id="success-sub">Welkom bij Kindgeld Premium! Je account is direct actief. Ga nu je eerste kindprofiel aanmaken.</div>
+    <button class="btn-success" id="success-btn" onclick="window.location.href='dashboard.html'">Ga naar de app →</button>
   </div>
 </div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
   var isYearly = false;
 
   /* ── BILLING TOGGLE ── */
-  function toggleBilling() {
-    isYearly = !isYearly;
-    var toggle = document.getElementById('billing-toggle');
-    toggle.className = 'toggle-switch ' + (isYearly ? 'yearly' : 'monthly');
+  function toggleBilling() { setBilling(!isYearly); }
+
+  function setBilling(yearly) {
+    isYearly = yearly;
+    var track = document.getElementById('billing-toggle');
+    track.classList.toggle('on', isYearly);
+    track.setAttribute('aria-checked', isYearly);
     document.getElementById('lbl-monthly').className = 'billing-label' + (isYearly ? '' : ' active');
-    document.getElementById('lbl-yearly').className = 'billing-label' + (isYearly ? ' active' : '');
+    document.getElementById('lbl-yearly').className  = 'billing-label' + (isYearly ? ' active' : '');
 
     if (isYearly) {
-      document.getElementById('gezin-price').innerHTML = '<sup>€</sup>3<sub>,29/mnd</sub>';
+      document.getElementById('gezin-price-num').textContent = '3';
+      document.getElementById('gezin-price-dec').textContent = ',29/mnd';
       document.getElementById('gezin-orig').style.display = 'block';
       document.getElementById('gezin-sub').textContent = '€39/jaar — bespaar €20';
-      document.getElementById('jaar-price').innerHTML = '<sup>€</sup>2<sub>,49/mnd</sub>';
+      document.getElementById('jaar-price-num').textContent = '2';
+      document.getElementById('jaar-price-dec').textContent = ',49/mnd';
       document.getElementById('jaar-sub').textContent = '€29/jaar — bespaar €30';
     } else {
-      document.getElementById('gezin-price').innerHTML = '<sup>€</sup>4<sub>,95/mnd</sub>';
+      document.getElementById('gezin-price-num').textContent = '4';
+      document.getElementById('gezin-price-dec').textContent = ',95/mnd';
       document.getElementById('gezin-orig').style.display = 'none';
-      document.getElementById('gezin-sub').textContent = 'Eerste maand gratis';
-      document.getElementById('jaar-price').innerHTML = '<sup>€</sup>3<sub>,29/mnd</sub>';
+      document.getElementById('gezin-sub').textContent = '🎁 Eerste maand gratis';
+      document.getElementById('jaar-price-num').textContent = '3';
+      document.getElementById('jaar-price-dec').textContent = ',29/mnd';
       document.getElementById('jaar-sub').textContent = '€39/jaar · bespaar €20';
     }
   }
 
   /* ── STRIPE CHECKOUT ── */
-  // ⚠️ VERVANG DIT MET JOUW ECHTE STRIPE PRICE IDS
-  // Maak deze aan op dashboard.stripe.com → Products → Add product
+  // ⚠️ Vervang met jouw echte Stripe Price IDs (dashboard.stripe.com → Products)
   var STRIPE_PRICE_IDS = {
     gezin_monthly: 'price_JOUW_GEZIN_MONTHLY_ID',
     gezin_yearly:  'price_JOUW_GEZIN_YEARLY_ID',
     jaar_monthly:  'price_JOUW_JAAR_MONTHLY_ID',
     jaar_yearly:   'price_JOUW_JAAR_YEARLY_ID',
   };
-
-  // ⚠️ VERVANG MET JOUW STRIPE PUBLISHABLE KEY
-  // Vind je op dashboard.stripe.com → Developers → API Keys
+  // ⚠️ Vervang met jouw Stripe Publishable Key (dashboard.stripe.com → Developers → API Keys)
   var STRIPE_PUBLIC_KEY = 'pk_live_JOUW_PUBLIEKE_STRIPE_KEY';
 
   function startCheckout(plan) {
     var btn = document.getElementById('btn-' + plan);
+    var origHTML = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Moment...';
+    btn.innerHTML = '<span class="spinner' + (plan === 'jaar' ? ' dark' : '') + '"></span> Moment...';
 
-    // Kies het juiste price ID
-    var priceKey = plan + '_' + (isYearly ? 'yearly' : 'monthly');
-    var priceId = STRIPE_PRICE_IDS[priceKey];
+    var priceId = STRIPE_PRICE_IDS[plan + '_' + (isYearly ? 'yearly' : 'monthly')];
 
-    // Voor demo: toon success scherm
-    // In productie: vervang onderstaande code door echte Stripe Checkout
-    if (priceId.startsWith('price_JOUW')) {
-      // DEMO MODE — laat zien hoe het werkt
-      setTimeout(() => {
+    // DEMO MODE — toon instructies als keys nog niet ingevuld zijn
+    if (!priceId || priceId.startsWith('price_JOUW')) {
+      setTimeout(function() {
         btn.disabled = false;
-        btn.innerHTML = plan === 'gezin' ? 'Starten — eerste maand gratis' : 'Jaarplan kiezen';
+        btn.innerHTML = origHTML;
         showDemoInstructions();
-      }, 1500);
+      }, 1200);
       return;
     }
 
-    // ECHTE STRIPE CHECKOUT (actief zodra je je keys invult)
-    var stripe = Stripe(STRIPE_PUBLIC_KEY);
-    stripe.redirectToCheckout({
+    // Laad Stripe.js lazy (pas bij gebruik)
+    if (!window.Stripe) {
+      var s = document.createElement('script');
+      s.src = 'https://js.stripe.com/v3/';
+      s.onload = function() { doStripeCheckout(plan, priceId, btn, origHTML); };
+      document.head.appendChild(s);
+    } else {
+      doStripeCheckout(plan, priceId, btn, origHTML);
+    }
+  }
+
+  function doStripeCheckout(plan, priceId, btn, origHTML) {
+    Stripe(STRIPE_PUBLIC_KEY).redirectToCheckout({
       lineItems: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
       successUrl: window.location.origin + '/dashboard.html?success=true',
       cancelUrl: window.location.href,
     }).then(function(result) {
-      if (result.error) {
-        btn.disabled = false;
-        btn.innerHTML = plan === 'gezin' ? 'Starten — eerste maand gratis' : 'Jaarplan kiezen';
-        alert('Er ging iets mis: ' + result.error.message);
-      }
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+      if (result.error) showToast('Er ging iets mis: ' + result.error.message, 'error');
     });
   }
 
   function showDemoInstructions() {
-    var overlay = document.getElementById('success-overlay');
-    overlay.querySelector('.success-icon').textContent = '⚙️';
-    overlay.querySelector('.success-title').textContent = 'Stripe instellen!';
-    overlay.querySelector('.success-sub').innerHTML =
+    document.getElementById('success-title').textContent = '⚙️ Stripe instellen';
+    document.getElementById('success-sub').innerHTML =
       'Dit is een demo. Om echte betalingen te verwerken:<br><br>' +
       '1. Maak een account op <strong>stripe.com</strong><br>' +
       '2. Ga naar <strong>Products → Add product</strong><br>' +
       '3. Kopieer de Price ID\'s in dit bestand<br>' +
       '4. Vul je Publishable Key in<br><br>' +
-      'Daarna verwerkt Stripe alle betalingen automatisch!';
-    overlay.querySelector('.btn-success').textContent = 'Begrepen →';
-    overlay.querySelector('.btn-success').onclick = () => overlay.classList.remove('show');
-    overlay.classList.add('show');
+      '<em>Daarna verwerkt Stripe alle betalingen automatisch!</em>';
+    document.getElementById('success-btn').textContent = 'Begrepen ✓';
+    document.getElementById('success-btn').onclick = function() {
+      document.getElementById('success-overlay').classList.remove('show');
+      // reset
+      document.getElementById('success-title').textContent = 'Betaling gelukt!';
+      document.getElementById('success-sub').textContent = 'Welkom bij Kindgeld Premium! Je account is direct actief.';
+      document.getElementById('success-btn').textContent = 'Ga naar de app →';
+      document.getElementById('success-btn').onclick = function() { window.location.href = 'dashboard.html'; };
+    };
+    document.getElementById('success-overlay').classList.add('show');
   }
 
   /* ── FAQ ── */
   function toggleFaq(item) {
+    // Sluit andere open items
+    document.querySelectorAll('.faq-item.open').forEach(function(el) {
+      if (el !== item) el.classList.remove('open');
+    });
     item.classList.toggle('open');
   }
 
-  /* ── SUCCESS FROM STRIPE REDIRECT ── */
+  /* ── TOAST ── */
+  function showToast(msg, type) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type ? ' ' + type : '');
+    clearTimeout(t._t);
+    t._t = setTimeout(function() { t.className = 'toast'; }, 4000);
+  }
+
+  /* ── SUCCESS NA STRIPE REDIRECT ── */
   if (window.location.search.includes('success=true')) {
     document.getElementById('success-overlay').classList.add('show');
+    // Verwijder query param zonder herlaad
+    history.replaceState(null, '', window.location.pathname);
   }
 </script>
 </body>
