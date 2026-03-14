@@ -774,16 +774,9 @@
     }
   }
 
-  /* ── STRIPE CHECKOUT ── */
-  // ⚠️ Vervang met jouw echte Stripe Price IDs (dashboard.stripe.com → Products)
-  var STRIPE_PRICE_IDS = {
-    gezin_monthly: 'price_JOUW_GEZIN_MONTHLY_ID',
-    gezin_yearly:  'price_JOUW_GEZIN_YEARLY_ID',
-    jaar_monthly:  'price_JOUW_JAAR_MONTHLY_ID',
-    jaar_yearly:   'price_JOUW_JAAR_YEARLY_ID',
-  };
-  // ⚠️ Vervang met jouw Stripe Publishable Key (dashboard.stripe.com → Developers → API Keys)
-  var STRIPE_PUBLIC_KEY = 'pk_live_JOUW_PUBLIEKE_STRIPE_KEY';
+  /* ── STRIPE CHECKOUT via Supabase Edge Function ── */
+  var SUPABASE_URL = 'https://ysdwxbwfbayygujlshxi.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzZHd4YndmYmF5eWd1amxzaHhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTc5OTMsImV4cCI6MjA4ODk5Mzk5M30.qsxpi4ls-5pLzLMVxzwfuF1YenB4ZpML8KE8QOq1mek';
 
   function startCheckout(plan) {
     var btn = document.getElementById('btn-' + plan);
@@ -791,61 +784,29 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner' + (plan === 'jaar' ? ' dark' : '') + '"></span> Moment...';
 
-    var priceId = STRIPE_PRICE_IDS[plan + '_' + (isYearly ? 'yearly' : 'monthly')];
-
-    // DEMO MODE — toon instructies als keys nog niet ingevuld zijn
-    if (!priceId || priceId.startsWith('price_JOUW')) {
-      setTimeout(function() {
+    fetch(SUPABASE_URL + '/functions/v1/stripe-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ plan: plan, billing: isYearly ? 'yearly' : 'monthly' }),
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
         btn.disabled = false;
         btn.innerHTML = origHTML;
-        showDemoInstructions();
-      }, 1200);
-      return;
-    }
-
-    // Laad Stripe.js lazy (pas bij gebruik)
-    if (!window.Stripe) {
-      var s = document.createElement('script');
-      s.src = 'https://js.stripe.com/v3/';
-      s.onload = function() { doStripeCheckout(plan, priceId, btn, origHTML); };
-      document.head.appendChild(s);
-    } else {
-      doStripeCheckout(plan, priceId, btn, origHTML);
-    }
-  }
-
-  function doStripeCheckout(plan, priceId, btn, origHTML) {
-    Stripe(STRIPE_PUBLIC_KEY).redirectToCheckout({
-      lineItems: [{ price: priceId, quantity: 1 }],
-      mode: 'subscription',
-      successUrl: window.location.origin + '/dashboard.html?success=true',
-      cancelUrl: window.location.href,
-    }).then(function(result) {
+        showToast('Er ging iets mis: ' + (data.error || 'Onbekende fout'), 'error');
+      }
+    })
+    .catch(function(err) {
       btn.disabled = false;
       btn.innerHTML = origHTML;
-      if (result.error) showToast('Er ging iets mis: ' + result.error.message, 'error');
+      showToast('Verbindingsfout: ' + err.message, 'error');
     });
-  }
-
-  function showDemoInstructions() {
-    document.getElementById('success-title').textContent = '⚙️ Stripe instellen';
-    document.getElementById('success-sub').innerHTML =
-      'Dit is een demo. Om echte betalingen te verwerken:<br><br>' +
-      '1. Maak een account op <strong>stripe.com</strong><br>' +
-      '2. Ga naar <strong>Products → Add product</strong><br>' +
-      '3. Kopieer de Price ID\'s in dit bestand<br>' +
-      '4. Vul je Publishable Key in<br><br>' +
-      '<em>Daarna verwerkt Stripe alle betalingen automatisch!</em>';
-    document.getElementById('success-btn').textContent = 'Begrepen ✓';
-    document.getElementById('success-btn').onclick = function() {
-      document.getElementById('success-overlay').classList.remove('show');
-      // reset
-      document.getElementById('success-title').textContent = 'Betaling gelukt!';
-      document.getElementById('success-sub').textContent = 'Welkom bij Kindgeld Premium! Je account is direct actief.';
-      document.getElementById('success-btn').textContent = 'Ga naar de app →';
-      document.getElementById('success-btn').onclick = function() { window.location.href = 'dashboard.html'; };
-    };
-    document.getElementById('success-overlay').classList.add('show');
   }
 
   /* ── FAQ ── */
@@ -866,12 +827,10 @@
     t._t = setTimeout(function() { t.className = 'toast'; }, 4000);
   }
 
-  /* ── SUCCESS NA STRIPE REDIRECT ── */
-  if (window.location.search.includes('success=true')) {
-    document.getElementById('success-overlay').classList.add('show');
-    // Verwijder query param zonder herlaad
-    history.replaceState(null, '', window.location.pathname);
-  }
+  /* ── SUCCESS OVERLAY SLUITEN ── */
+  document.getElementById('success-btn').addEventListener('click', function() {
+    window.location.href = 'dashboard.html';
+  });
 </script>
 </body>
 </html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kindgeld — Betaling gelukt!</title>
+  <meta name="description" content="Welkom bij Kindgeld! Je abonnement is actief.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --green: #1D9E75; --green-dark: #085041; --green-light: #E1F5EE;
+      --orange: #D85A30; --amber: #EF9F27;
+      --text: #1a1a1a; --text-muted: #6b7280;
+      --border: rgba(0,0,0,0.09); --bg: #FAFAF8; --white: #ffffff;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-md: 0 8px 28px rgba(0,0,0,0.10);
+      --shadow-lg: 0 20px 56px rgba(0,0,0,0.14);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; overflow-x: hidden;
+      display: flex; flex-direction: column;
+    }
+
+    @keyframes float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes fadeUp  { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes popIn   { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ── ACHTERGROND ── */
+    .bg-shapes { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .shape { position: absolute; border-radius: 50%; }
+    .shape-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(29,158,117,0.12) 0%, transparent 70%); top: -200px; right: -150px; }
+    .shape-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(239,159,39,0.08) 0%, transparent 70%); bottom: -100px; left: -100px; }
+
+    /* ── CONFETTI ── */
+    .confetti-piece {
+      position: fixed; top: -30px; font-size: 22px; pointer-events: none; z-index: 200;
+      animation: confettiFall linear forwards;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: relative; z-index: 10;
+      padding: 20px 40px; max-width: 900px; margin: 0 auto; width: 100%;
+    }
+    .logo { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; color: var(--orange); text-decoration: none; }
+    .logo span { color: var(--green); }
+
+    /* ── MAIN ── */
+    main {
+      position: relative; z-index: 1;
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 16px 24px 60px;
+    }
+
+    /* ── CARD ── */
+    .success-card {
+      background: var(--white); border-radius: 28px;
+      padding: 52px 44px; max-width: 520px; width: 100%;
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+
+    .success-emoji {
+      font-size: 72px; display: block;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .success-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green-light); border: 1px solid rgba(29,158,117,0.25);
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 13px; font-weight: 700; color: var(--green-dark);
+      margin-bottom: 20px;
+    }
+    .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+
+    .success-title {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: 34px; font-weight: 800; line-height: 1.2;
+      margin-bottom: 10px; color: var(--text);
+    }
+    .success-title .plan-highlight { color: var(--green); }
+
+    .success-sub {
+      font-size: 16px; color: var(--text-muted); line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    /* ── PLAN INFO BLOK ── */
+    .plan-info {
+      background: var(--green-light); border-radius: 18px;
+      padding: 24px 24px 20px; margin-bottom: 32px;
+      border: 1px solid rgba(29,158,117,0.2);
+      text-align: left;
+    }
+    .plan-info-title {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: 16px; font-weight: 800; color: var(--green-dark);
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .plan-info ul {
+      list-style: none; display: flex; flex-direction: column; gap: 8px;
+    }
+    .plan-info li {
+      font-size: 14px; color: var(--green-dark); font-weight: 600;
+      display: flex; align-items: flex-start; gap: 8px; line-height: 1.4;
+    }
+    .plan-info li::before { content: '✓'; font-weight: 900; flex-shrink: 0; }
+
+    .plan-active-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(29,158,117,0.15); border-radius: 10px;
+      padding: 8px 14px; margin-top: 16px;
+      font-size: 13px; font-weight: 800; color: var(--green-dark);
+    }
+    .plan-active-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+    }
+
+    .trial-note {
+      font-size: 13px; font-weight: 700; color: var(--orange);
+      margin-top: 10px; text-align: center;
+    }
+
+    /* ── KNOPPEN ── */
+    .btn-dashboard {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+      color: white; border: none; border-radius: 16px;
+      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 6px 20px rgba(29,158,117,0.35);
+      margin-bottom: 14px;
+    }
+    .btn-dashboard:hover { filter: brightness(1.06); box-shadow: 0 8px 28px rgba(29,158,117,0.45); }
+
+    .link-back {
+      font-size: 14px; color: var(--text-muted); text-decoration: none;
+      font-weight: 600; transition: color 0.15s;
+    }
+    .link-back:hover { color: var(--green); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .success-card { padding: 36px 24px; }
+      .success-title { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-shapes">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+</div>
+
+<nav>
+  <a href="index.html" class="logo">Kind<span>geld</span></a>
+</nav>
+
+<main>
+  <div class="success-card">
+    <span class="success-emoji">🎉</span>
+
+    <div class="success-badge">
+      <span class="badge-dot"></span>
+      Betaling bevestigd
+    </div>
+
+    <div class="success-title">
+      Welkom bij Kindgeld <span class="plan-highlight" id="plan-name">Gezin</span>!
+    </div>
+
+    <div class="success-sub" id="success-sub">
+      Je account is direct actief. Alles staat klaar om je gezin te laten starten.
+    </div>
+
+    <div class="plan-info" id="plan-info">
+      <div class="plan-info-title">
+        <span id="plan-icon">🏠</span>
+        <span id="plan-info-label">Kindgeld Gezin — wat je nu hebt:</span>
+      </div>
+      <ul id="plan-features-list">
+        <!-- Ingevuld door JS -->
+      </ul>
+      <div class="plan-active-badge">
+        <span class="plan-active-dot"></span>
+        Je account is direct actief
+      </div>
+      <div class="trial-note" id="trial-note" style="display:none">
+        🎁 Eerste 30 dagen gratis — geen kosten vandaag
+      </div>
+    </div>
+
+    <a href="dashboard.html" class="btn-dashboard">
+      Ga naar dashboard →
+    </a>
+    <a href="abonnement.html" class="link-back">Terug naar abonnementen</a>
+  </div>
+</main>
+
+<script>
+  var SUPABASE_URL = 'https://ysdwxbwfbayygujlshxi.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzZHd4YndmYmF5eWd1amxzaHhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTc5OTMsImV4cCI6MjA4ODk5Mzk5M30.qsxpi4ls-5pLzLMVxzwfuF1YenB4ZpML8KE8QOq1mek';
+
+  var PLAN_DATA = {
+    gezin: {
+      name: 'Gezin',
+      icon: '🏠',
+      label: 'Kindgeld Gezin — wat je nu hebt:',
+      features: [
+        'Tot 4 kindprofielen',
+        'Onbeperkt spaardoelen & uitdagingen',
+        'Beloningenwinkel',
+        'Automatisch zakgeld',
+        'Ouderportaal & goedkeuringen',
+        'Badges & statistieken',
+      ],
+      trial: true,
+    },
+    jaar: {
+      name: 'Jaar',
+      icon: '🚀',
+      label: 'Kindgeld Jaar — wat je nu hebt:',
+      features: [
+        'Tot 6 kindprofielen',
+        'Alles uit het Gezin-plan',
+        'Prioriteit support',
+        'Vroege toegang nieuwe functies',
+        'Exporteer spaargeld rapport',
+        'Verjaardags-bonus munten',
+        '30 dagen geld-terug garantie',
+      ],
+      trial: false,
+    },
+  };
+
+  // Lees URL params
+  var params = new URLSearchParams(window.location.search);
+  var planParam = (params.get('plan') || 'gezin').toLowerCase();
+  var planData = PLAN_DATA[planParam] || PLAN_DATA['gezin'];
+
+  // Vul plan-info in
+  document.getElementById('plan-name').textContent = planData.name;
+  document.getElementById('plan-icon').textContent = planData.icon;
+  document.getElementById('plan-info-label').textContent = planData.label;
+
+  var ul = document.getElementById('plan-features-list');
+  planData.features.forEach(function(f) {
+    var li = document.createElement('li');
+    li.textContent = f;
+    ul.appendChild(li);
+  });
+
+  if (planData.trial) {
+    document.getElementById('trial-note').style.display = 'block';
+  }
+
+  // Confetti animatie
+  var confettiEmojis = ['🎉', '🎊', '✨', '🌟', '💚', '🥳', '⭐'];
+  for (var i = 0; i < 18; i++) {
+    (function(index) {
+      setTimeout(function() {
+        var el = document.createElement('span');
+        el.className = 'confetti-piece';
+        el.textContent = confettiEmojis[index % confettiEmojis.length];
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+        el.style.animationDelay = '0s';
+        el.style.fontSize = (16 + Math.random() * 18) + 'px';
+        document.body.appendChild(el);
+        setTimeout(function() { el.remove(); }, 5000);
+      }, index * 150);
+    })(i);
+  }
+
+  // Supabase: update plan voor ingelogde gebruiker
+  (function() {
+    try {
+      var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      db.auth.getUser().then(function(result) {
+        var user = result.data && result.data.user;
+        if (!user) return; // Niet ingelogd, gewoon succes tonen
+        db.from('profielen')
+          .update({ plan: planParam })
+          .eq('id', user.id)
+          .then(function(res) {
+            if (res.error) {
+              console.warn('Plan update mislukt:', res.error.message);
+            }
+          });
+      });
+    } catch (e) {
+      console.warn('Supabase plan update fout:', e);
+    }
+  })();
+</script>
+</body>
+</html>
