@@ -921,10 +921,8 @@ function renderUitdagingen() {
     return;
   }
 
-  // Sorteer: vastgezet eerst, dan onvoltooid, dan voltooid
+  // Sorteer: onvoltooid eerst, dan voltooid
   const gesorteerd = [...uitdagingen].sort((a,b) => {
-    if (a.vastgezet && !b.vastgezet) return -1;
-    if (!a.vastgezet && b.vastgezet) return 1;
     if (!a.voltooid && b.voltooid) return -1;
     if (a.voltooid && !b.voltooid) return 1;
     return 0;
@@ -935,24 +933,15 @@ function renderUitdagingen() {
       <div class="ch-dot ${u.voltooid ? 'done' : ''}" onclick="toggleUitdaging('${u.id}', ${u.voltooid})">${u.voltooid ? '✓' : ''}</div>
       <span class="ch-emoji" onclick="toggleUitdaging('${u.id}', ${u.voltooid})">${u.emoji || '⚡'}</span>
       <div class="ch-text" onclick="toggleUitdaging('${u.id}', ${u.voltooid})">
-        <div class="ch-name">${u.naam} ${u.vastgezet ? '📌' : ''}</div>
+        <div class="ch-name">${u.naam}</div>
         <div class="ch-sub">${u.herhaling || 'eenmalig'} · ${u.voltooid ? 'Klaar!' : `+🪙${u.beloning_munten || 5}`}</div>
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0">
-        <button onclick="toggleVastgezet('${u.id}', ${!!u.vastgezet})" title="${u.vastgezet ? 'Losmaken' : 'Vastzetten'}"
-          style="background:${u.vastgezet ? 'var(--amber-light)' : 'var(--bg)'};border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:14px">📌</button>
         <button onclick="verwijderUitdaging('${u.id}', '${u.naam.replace(/'/g,"\\'")}') " title="Verwijderen"
           style="background:var(--red-light);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:14px">🗑️</button>
       </div>
     </div>
   `).join('');
-}
-
-async function toggleVastgezet(id, wasVastgezet) {
-  await db.from('uitdagingen').update({ vastgezet: !wasVastgezet }).eq('id', id);
-  uitdagingen = uitdagingen.map(u => u.id === id ? { ...u, vastgezet: !wasVastgezet } : u);
-  renderUitdagingen();
-  toonToast(wasVastgezet ? 'Uitdaging losgemaakt' : '📌 Uitdaging vastgezet!');
 }
 
 async function verwijderUitdaging(id, naam) {
@@ -1056,7 +1045,7 @@ async function templatesOpslaan() {
     emoji: t.emoji,
     beloning_munten: t.munten,
     herhaling: t.herhaling,
-    vastgezet: t.herhaling === 'dagelijks',
+    
     aangemaakt_door: huidigGebruiker.id
   }));
 
