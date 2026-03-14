@@ -183,6 +183,9 @@
       <div class="nav-icon">🎯</div><span class="nav-label">Spaardoel toevoegen</span>
     </button>
     <div class="nav-section">Account</div>
+    <button class="nav-item" onclick="openModal('modal-zakgeld')">
+      <div class="nav-icon">🪙</div><span class="nav-label">Zakgeld instellen</span>
+    </button>
     <button class="nav-item" onclick="openModal('modal-bijstorten')">
       <div class="nav-icon">💰</div><span class="nav-label">Bijstorten</span>
     </button>
@@ -379,46 +382,75 @@
 
 <!-- MODAL: UITDAGING TOEVOEGEN -->
 <div class="modal-overlay" id="modal-uitdaging" onclick="closeModalOutside(event,'modal-uitdaging')">
-  <div class="modal">
+  <div class="modal" style="max-width:540px">
     <button class="modal-close" onclick="closeModal('modal-uitdaging')">✕</button>
     <div class="modal-title">⚡ Uitdaging toevoegen</div>
-    <div class="form-group">
-      <label class="form-label">Naam van de uitdaging</label>
-      <input class="form-input" id="uitd-naam" placeholder="Tanden poetsen" type="text">
+
+    <!-- TABS -->
+    <div style="display:flex;gap:6px;margin-bottom:20px;background:var(--bg);border-radius:12px;padding:4px;">
+      <button id="tab-templates" onclick="switchUitdagingTab('templates')" style="flex:1;padding:8px;border-radius:9px;border:none;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:white;color:var(--text);">🌟 Kies een template</button>
+      <button id="tab-eigen" onclick="switchUitdagingTab('eigen')" style="flex:1;padding:8px;border-radius:9px;border:none;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-muted);">✏️ Zelf invullen</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Emoji</label>
-      <div class="avatar-grid">
-        <div class="avatar-option selected" onclick="selectUitdagingEmoji(this,'🦷')">🦷</div>
-        <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🛏️')">🛏️</div>
-        <div class="avatar-option" onclick="selectUitdagingEmoji(this,'📚')">📚</div>
-        <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🥦')">🥦</div>
-        <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🧹')">🧹</div>
-        <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🐕')">🐕</div>
-        <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🏃')">🏃</div>
-        <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🎨')">🎨</div>
-        <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🎵')">🎵</div>
-        <div class="avatar-option" onclick="selectUitdagingEmoji(this,'⭐')">⭐</div>
+
+    <!-- TEMPLATES TAB -->
+    <div id="uitd-tab-templates">
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:10px">📅 Dagelijkse taken</div>
+      <div id="template-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px"></div>
+
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin:16px 0 10px">📆 Wekelijkse taken</div>
+      <div id="template-grid-week" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px"></div>
+
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin:16px 0 10px">🎯 Eenmalig</div>
+      <div id="template-grid-eenmalig" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px"></div>
+
+      <div id="geselecteerde-templates" style="display:none;background:var(--green-light);border-radius:12px;padding:12px;margin-bottom:12px">
+        <div style="font-size:12px;font-weight:800;color:var(--green-dark);margin-bottom:6px">✓ Geselecteerd:</div>
+        <div id="geselecteerde-lijst" style="font-size:13px;color:var(--green-dark)"></div>
       </div>
+
+      <button class="btn-modal-submit" id="btn-templates-toevoegen" onclick="templatesOpslaan()" style="display:none">Toevoegen aan uitdagingen →</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Beloning in munten 🪙</label>
-      <div class="amount-grid">
-        <div class="amount-btn selected" onclick="selectMunten(this,5)">🪙5</div>
-        <div class="amount-btn" onclick="selectMunten(this,10)">🪙10</div>
-        <div class="amount-btn" onclick="selectMunten(this,15)">🪙15</div>
-        <div class="amount-btn" onclick="selectMunten(this,20)">🪙20</div>
+
+    <!-- EIGEN TAB -->
+    <div id="uitd-tab-eigen" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Naam van de uitdaging</label>
+        <input class="form-input" id="uitd-naam" placeholder="Tanden poetsen" type="text">
       </div>
+      <div class="form-group">
+        <label class="form-label">Emoji</label>
+        <div class="avatar-grid">
+          <div class="avatar-option selected" onclick="selectUitdagingEmoji(this,'🦷')">🦷</div>
+          <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🛏️')">🛏️</div>
+          <div class="avatar-option" onclick="selectUitdagingEmoji(this,'📚')">📚</div>
+          <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🥦')">🥦</div>
+          <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🧹')">🧹</div>
+          <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🐕')">🐕</div>
+          <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🏃')">🏃</div>
+          <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🎨')">🎨</div>
+          <div class="avatar-option" onclick="selectUitdagingEmoji(this,'🎵')">🎵</div>
+          <div class="avatar-option" onclick="selectUitdagingEmoji(this,'⭐')">⭐</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Beloning in munten 🪙</label>
+        <div class="amount-grid">
+          <div class="amount-btn selected" onclick="selectMunten(this,5)">🪙5</div>
+          <div class="amount-btn" onclick="selectMunten(this,10)">🪙10</div>
+          <div class="amount-btn" onclick="selectMunten(this,15)">🪙15</div>
+          <div class="amount-btn" onclick="selectMunten(this,20)">🪙20</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Herhaling</label>
+        <select class="form-input" id="uitd-herhaling">
+          <option value="dagelijks">Dagelijks</option>
+          <option value="wekelijks">Wekelijks</option>
+          <option value="eenmalig">Eenmalig</option>
+        </select>
+      </div>
+      <button class="btn-modal-submit" id="btn-uitdaging-opslaan" onclick="uitdagingOpslaan()">Uitdaging toevoegen →</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Herhaling</label>
-      <select class="form-input" id="uitd-herhaling">
-        <option value="dagelijks">Dagelijks</option>
-        <option value="wekelijks">Wekelijks</option>
-        <option value="eenmalig">Eenmalig</option>
-      </select>
-    </div>
-    <button class="btn-modal-submit" id="btn-uitdaging-opslaan" onclick="uitdagingOpslaan()">Uitdaging toevoegen →</button>
   </div>
 </div>
 
@@ -454,7 +486,65 @@
   </div>
 </div>
 
-<!-- MODAL: BIJSTORTEN -->
+<!-- MODAL: ZAKGELD INSTELLEN -->
+<div class="modal-overlay" id="modal-zakgeld" onclick="closeModalOutside(event,'modal-zakgeld')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-zakgeld')">✕</button>
+    <div class="modal-title">🪙 Zakgeld instellen</div>
+
+    <div style="background:var(--green-light);border-radius:14px;padding:14px;margin-bottom:20px;font-size:13px;color:var(--green-dark);font-weight:600;line-height:1.6">
+      Stel automatisch zakgeld in voor <strong id="zakgeld-kind-naam">je kind</strong>. Het bedrag wordt elke week automatisch bijgeschreven op de dag die jij kiest.
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Wekelijks zakgeld bedrag</label>
+      <div class="amount-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="amount-btn" onclick="selectZakgeldBedrag(this,'1.00')">€1</div>
+        <div class="amount-btn" onclick="selectZakgeldBedrag(this,'2.50')">€2,50</div>
+        <div class="amount-btn selected" onclick="selectZakgeldBedrag(this,'5.00')">€5</div>
+        <div class="amount-btn" onclick="selectZakgeldBedrag(this,'10.00')">€10</div>
+      </div>
+      <input class="form-input" id="zakgeld-bedrag" type="number" min="0.50" step="0.50" placeholder="Of vul zelf in..." style="margin-top:8px">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Uitbetaaldag</label>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">
+        <div class="amount-btn" onclick="selectZakgeldDag(this,'ma')" style="padding:8px 4px;font-size:12px">Ma</div>
+        <div class="amount-btn" onclick="selectZakgeldDag(this,'di')" style="padding:8px 4px;font-size:12px">Di</div>
+        <div class="amount-btn" onclick="selectZakgeldDag(this,'wo')" style="padding:8px 4px;font-size:12px">Wo</div>
+        <div class="amount-btn" onclick="selectZakgeldDag(this,'do')" style="padding:8px 4px;font-size:12px">Do</div>
+        <div class="amount-btn selected" onclick="selectZakgeldDag(this,'vr')" style="padding:8px 4px;font-size:12px">Vr</div>
+        <div class="amount-btn" onclick="selectZakgeldDag(this,'za')" style="padding:8px 4px;font-size:12px">Za</div>
+        <div class="amount-btn" onclick="selectZakgeldDag(this,'zo')" style="padding:8px 4px;font-size:12px">Zo</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <div style="display:flex;gap:8px">
+        <div class="amount-btn selected" id="zakgeld-aan" onclick="selectZakgeldStatus('aan')" style="flex:1">✅ Automatisch aan</div>
+        <div class="amount-btn" id="zakgeld-uit" onclick="selectZakgeldStatus('uit')" style="flex:1">⏸️ Uitgeschakeld</div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:800;color:var(--text-muted);margin-bottom:6px">VOLGENDE UITBETALING</div>
+      <div id="zakgeld-volgende" style="font-size:14px;font-weight:700;color:var(--text)">Vrijdag aanstaande</div>
+    </div>
+
+    <button class="btn-modal-submit" id="btn-zakgeld-opslaan" onclick="zakgeldOpslaan()">Zakgeld instellen →</button>
+
+    <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:16px">
+      <div style="font-size:13px;font-weight:800;margin-bottom:10px">💰 Nu extra bijstorten</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Buiten het automatische zakgeld om, bijv. voor een beloning of een speciale gelegenheid.</div>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="extra-bedrag" type="number" min="0.50" step="0.50" placeholder="€ bedrag" style="flex:1">
+        <button onclick="extraBijstorten()" style="background:var(--green);color:white;border:none;border-radius:11px;padding:0 16px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">+ Bijstorten</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-bijstorten" onclick="closeModalOutside(event,'modal-bijstorten')">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-bijstorten')">✕</button>
@@ -490,7 +580,75 @@ let kinderen = [];
 let huidigKind = null;
 let uitdagingen = [];
 let spaardoelen = [];
-let gekozenAvatar = '🐱';
+let gekozenZakgeldBedrag = '5.00';
+let gekozenZakgeldDag = 'vr';
+let zakgeldStatus = 'aan';
+
+function selectZakgeldBedrag(el, val) {
+  document.querySelectorAll('#modal-zakgeld .amount-btn').forEach(e => {
+    if (['€1','€2,50','€5','€10'].some(t => e.textContent.includes(t.replace('€','')))) e.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  gekozenZakgeldBedrag = val;
+  document.getElementById('zakgeld-bedrag').value = '';
+}
+
+function selectZakgeldDag(el, dag) {
+  document.querySelectorAll('#modal-zakgeld .amount-btn').forEach(e => {
+    if (['Ma','Di','Wo','Do','Vr','Za','Zo'].includes(e.textContent.trim())) e.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  gekozenZakgeldDag = dag;
+  const dagNamen = {ma:'Maandag',di:'Dinsdag',wo:'Woensdag',do:'Donderdag',vr:'Vrijdag',za:'Zaterdag',zo:'Zondag'};
+  document.getElementById('zakgeld-volgende').textContent = dagNamen[dag] + ' aanstaande';
+}
+
+function selectZakgeldStatus(status) {
+  zakgeldStatus = status;
+  document.getElementById('zakgeld-aan').classList.toggle('selected', status === 'aan');
+  document.getElementById('zakgeld-uit').classList.toggle('selected', status === 'uit');
+}
+
+async function zakgeldOpslaan() {
+  if (!huidigKind) return toonToast('Selecteer eerst een kind', 'error');
+  const inputBedrag = document.getElementById('zakgeld-bedrag').value;
+  const bedrag = parseFloat(inputBedrag || gekozenZakgeldBedrag);
+  if (!bedrag || bedrag <= 0) return toonToast('Vul een geldig bedrag in', 'error');
+
+  setModalLaden('btn-zakgeld-opslaan', true);
+  const dagNamen = {ma:'Maandag',di:'Dinsdag',wo:'Woensdag',do:'Donderdag',vr:'Vrijdag',za:'Zaterdag',zo:'Zondag'};
+
+  // Sla zakgeld instelling op als JSON in kind record
+  await db.from('kinderen').update({
+    zakgeld_bedrag: bedrag,
+    zakgeld_dag: gekozenZakgeldDag,
+    zakgeld_actief: zakgeldStatus === 'aan'
+  }).eq('id', huidigKind.id);
+
+  toonToast(`🪙 Zakgeld ingesteld! Elke ${dagNamen[gekozenZakgeldDag]} €${bedrag.toFixed(2)}`, 'success');
+  closeModal('modal-zakgeld');
+  setModalLaden('btn-zakgeld-opslaan', false);
+}
+
+async function extraBijstorten() {
+  const bedrag = parseFloat(document.getElementById('extra-bedrag').value);
+  if (!bedrag || bedrag <= 0) return toonToast('Vul een geldig bedrag in', 'error');
+  if (!huidigKind) return toonToast('Selecteer eerst een kind', 'error');
+
+  const nieuwSaldo = (parseFloat(huidigKind.saldo) || 0) + bedrag;
+  await db.from('kinderen').update({ saldo: nieuwSaldo }).eq('id', huidigKind.id);
+  await db.from('transacties').insert({
+    kind_id: huidigKind.id, type: 'storting', bedrag, omschrijving: 'Extra bijstorting'
+  });
+
+  huidigKind.saldo = nieuwSaldo;
+  document.getElementById('stat-saldo').textContent = euro(nieuwSaldo);
+  document.getElementById('info-saldo').textContent = euro(nieuwSaldo);
+  document.getElementById('extra-bedrag').value = '';
+
+  toonToast(`${euro(bedrag)} bijgestort! 💰`, 'success');
+  if (spaardoelen.length > 0) await laadSpaardoelen();
+}
 let gekozenUitdagingEmoji = '🦷';
 let gekozenDoelEmoji = '🎮';
 let gekozenMunten = 5;
@@ -631,19 +789,163 @@ function renderUitdagingen() {
     return;
   }
 
-  container.innerHTML = uitdagingen.map(u => `
-    <div class="challenge-item ${u.voltooid ? 'done-item' : ''}" id="uitd-${u.id}" onclick="toggleUitdaging('${u.id}', ${u.voltooid})">
-      <div class="ch-dot ${u.voltooid ? 'done' : ''}">${u.voltooid ? '✓' : ''}</div>
-      <span class="ch-emoji">${u.emoji || '⚡'}</span>
-      <div class="ch-text">
-        <div class="ch-name">${u.naam}</div>
-        <div class="ch-sub">${u.herhaling || 'eenmalig'}</div>
+  // Sorteer: vastgezet eerst, dan onvoltooid, dan voltooid
+  const gesorteerd = [...uitdagingen].sort((a,b) => {
+    if (a.vastgezet && !b.vastgezet) return -1;
+    if (!a.vastgezet && b.vastgezet) return 1;
+    if (!a.voltooid && b.voltooid) return -1;
+    if (a.voltooid && !b.voltooid) return 1;
+    return 0;
+  });
+
+  container.innerHTML = gesorteerd.map(u => `
+    <div class="challenge-item ${u.voltooid ? 'done-item' : ''}" id="uitd-${u.id}">
+      <div class="ch-dot ${u.voltooid ? 'done' : ''}" onclick="toggleUitdaging('${u.id}', ${u.voltooid})">${u.voltooid ? '✓' : ''}</div>
+      <span class="ch-emoji" onclick="toggleUitdaging('${u.id}', ${u.voltooid})">${u.emoji || '⚡'}</span>
+      <div class="ch-text" onclick="toggleUitdaging('${u.id}', ${u.voltooid})">
+        <div class="ch-name">${u.naam} ${u.vastgezet ? '📌' : ''}</div>
+        <div class="ch-sub">${u.herhaling || 'eenmalig'} · ${u.voltooid ? 'Klaar!' : `+🪙${u.beloning_munten || 5}`}</div>
       </div>
-      <span class="ch-reward ${u.voltooid ? 'done' : ''}">
-        ${u.voltooid ? '✓ Klaar' : `+🪙${u.beloning_munten || 5}`}
-      </span>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button onclick="toggleVastgezet('${u.id}', ${!!u.vastgezet})" title="${u.vastgezet ? 'Losmaken' : 'Vastzetten'}"
+          style="background:${u.vastgezet ? 'var(--amber-light)' : 'var(--bg)'};border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:14px">📌</button>
+        <button onclick="verwijderUitdaging('${u.id}', '${u.naam.replace(/'/g,"\\'")}') " title="Verwijderen"
+          style="background:var(--red-light);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:14px">🗑️</button>
+      </div>
     </div>
   `).join('');
+}
+
+async function toggleVastgezet(id, wasVastgezet) {
+  await db.from('uitdagingen').update({ vastgezet: !wasVastgezet }).eq('id', id);
+  uitdagingen = uitdagingen.map(u => u.id === id ? { ...u, vastgezet: !wasVastgezet } : u);
+  renderUitdagingen();
+  toonToast(wasVastgezet ? 'Uitdaging losgemaakt' : '📌 Uitdaging vastgezet!');
+}
+
+async function verwijderUitdaging(id, naam) {
+  if (!confirm(`"${naam}" verwijderen?`)) return;
+  await db.from('uitdagingen').delete().eq('id', id);
+  uitdagingen = uitdagingen.filter(u => u.id !== id);
+  renderUitdagingen();
+  toonToast('Uitdaging verwijderd');
+}
+
+// ── TEMPLATES ──────────────────────────────────────────
+const TEMPLATES = {
+  dagelijks: [
+    { naam: 'Tanden poetsen', emoji: '🦷', munten: 5 },
+    { naam: 'Tafel afruimen', emoji: '🍽️', munten: 5 },
+    { naam: 'Huiswerk maken', emoji: '📚', munten: 10 },
+    { naam: 'Bed opmaken', emoji: '🛏️', munten: 5 },
+    { naam: 'Douchen', emoji: '🚿', munten: 5 },
+    { naam: 'Groente eten', emoji: '🥦', munten: 8 },
+    { naam: 'Op tijd opstaan', emoji: '⏰', munten: 5 },
+    { naam: 'Pyjama opvouwen', emoji: '👕', munten: 3 },
+  ],
+  wekelijks: [
+    { naam: 'Kamer opruimen', emoji: '🧹', munten: 10 },
+    { naam: 'Vuilnis buiten zetten', emoji: '🗑️', munten: 8 },
+    { naam: 'Hond uitlaten', emoji: '🐕', munten: 10 },
+    { naam: 'Boodschappen helpen', emoji: '🛒', munten: 8 },
+    { naam: 'Was opvouwen', emoji: '👔', munten: 8 },
+    { naam: 'Bibliotheek boek lezen', emoji: '📖', munten: 10 },
+  ],
+  eenmalig: [
+    { naam: 'Rapport halen', emoji: '📋', munten: 20 },
+    { naam: 'Sportdag meedoen', emoji: '🏃', munten: 15 },
+    { naam: 'Iets nieuws proberen', emoji: '⭐', munten: 15 },
+    { naam: 'Klusje helpen', emoji: '🔧', munten: 10 },
+  ]
+};
+
+let geselecteerdeTemplates = [];
+
+function bouwTemplateGrids() {
+  geselecteerdeTemplates = [];
+  ['dagelijks','wekelijks','eenmalig'].forEach(type => {
+    const suffix = type === 'dagelijks' ? '' : type === 'wekelijks' ? '-week' : '-eenmalig';
+    const grid = document.getElementById('template-grid' + suffix);
+    if (!grid) return;
+    grid.innerHTML = TEMPLATES[type].map((t, i) => `
+      <div class="template-card" id="tmpl-${type}-${i}"
+        onclick="toggleTemplate('${type}', ${i})"
+        style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--border);background:white;cursor:pointer;transition:all 0.15s">
+        <span style="font-size:20px">${t.emoji}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">${t.naam}</div>
+          <div style="font-size:11px;color:var(--text-muted)">🪙${t.munten} · ${type}</div>
+        </div>
+      </div>
+    `).join('');
+  });
+  document.getElementById('geselecteerde-templates').style.display = 'none';
+  document.getElementById('btn-templates-toevoegen').style.display = 'none';
+}
+
+function toggleTemplate(type, index) {
+  const key = `${type}-${index}`;
+  const card = document.getElementById(`tmpl-${key}`);
+  const template = TEMPLATES[type][index];
+  const bestaatAl = geselecteerdeTemplates.findIndex(t => t.key === key);
+
+  if (bestaatAl >= 0) {
+    geselecteerdeTemplates.splice(bestaatAl, 1);
+    card.style.background = 'white';
+    card.style.borderColor = 'var(--border)';
+  } else {
+    geselecteerdeTemplates.push({ key, ...template, herhaling: type });
+    card.style.background = 'var(--green-light)';
+    card.style.borderColor = 'var(--green)';
+  }
+
+  // Update geselecteerd overzicht
+  if (geselecteerdeTemplates.length > 0) {
+    document.getElementById('geselecteerde-templates').style.display = 'block';
+    document.getElementById('btn-templates-toevoegen').style.display = 'block';
+    document.getElementById('geselecteerde-lijst').textContent =
+      geselecteerdeTemplates.map(t => `${t.emoji} ${t.naam}`).join(' · ');
+  } else {
+    document.getElementById('geselecteerde-templates').style.display = 'none';
+    document.getElementById('btn-templates-toevoegen').style.display = 'none';
+  }
+}
+
+async function templatesOpslaan() {
+  if (geselecteerdeTemplates.length === 0) return;
+  if (!huidigKind) return toonToast('Selecteer eerst een kind', 'error');
+
+  document.getElementById('btn-templates-toevoegen').innerHTML = '<span class="spinner"></span> Toevoegen...';
+  document.getElementById('btn-templates-toevoegen').disabled = true;
+
+  const inserts = geselecteerdeTemplates.map(t => ({
+    kind_id: huidigKind.id,
+    naam: t.naam,
+    emoji: t.emoji,
+    beloning_munten: t.munten,
+    herhaling: t.herhaling,
+    vastgezet: t.herhaling === 'dagelijks',
+    aangemaakt_door: huidigGebruiker.id
+  }));
+
+  const { error } = await db.from('uitdagingen').insert(inserts);
+  if (error) { toonToast('Fout: ' + error.message, 'error'); }
+  else {
+    toonToast(`${geselecteerdeTemplates.length} uitdaging(en) toegevoegd! ⚡`, 'success');
+    closeModal('modal-uitdaging');
+    await laadUitdagingen();
+  }
+  document.getElementById('btn-templates-toevoegen').innerHTML = 'Toevoegen aan uitdagingen →';
+  document.getElementById('btn-templates-toevoegen').disabled = false;
+}
+
+function switchUitdagingTab(tab) {
+  document.getElementById('uitd-tab-templates').style.display = tab === 'templates' ? 'block' : 'none';
+  document.getElementById('uitd-tab-eigen').style.display = tab === 'eigen' ? 'block' : 'none';
+  document.getElementById('tab-templates').style.background = tab === 'templates' ? 'white' : 'transparent';
+  document.getElementById('tab-templates').style.color = tab === 'templates' ? 'var(--text)' : 'var(--text-muted)';
+  document.getElementById('tab-eigen').style.background = tab === 'eigen' ? 'white' : 'transparent';
+  document.getElementById('tab-eigen').style.color = tab === 'eigen' ? 'var(--text)' : 'var(--text-muted)';
 }
 
 async function toggleUitdaging(id, wasVoltooid) {
@@ -857,7 +1159,18 @@ function toonToast(msg, type = '') {
   setTimeout(() => t.className = 'toast', 3000);
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id === 'modal-uitdaging') {
+    switchUitdagingTab('templates');
+    bouwTemplateGrids();
+  }
+  if (id === 'modal-zakgeld' && huidigKind) {
+    document.getElementById('zakgeld-kind-naam').textContent = huidigKind.naam;
+    if (huidigKind.zakgeld_bedrag) document.getElementById('zakgeld-bedrag').value = huidigKind.zakgeld_bedrag;
+    if (huidigKind.zakgeld_actief === false) selectZakgeldStatus('uit');
+  }
+}
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function closeModalOutside(e, id) { if (e.target.id === id) closeModal(id); }
 
