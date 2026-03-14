@@ -156,6 +156,53 @@
     /* GEEN KINDEREN VIEW */
     #view-geen-kinderen{display:none;}
 
+    /* KID MODE */
+    .kid-screen{display:none;min-height:100vh;background:linear-gradient(160deg,#0A6B50 0%,#1D9E75 60%,#2EC98A 100%);padding:0;}
+    .kid-header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 0;}
+    .kid-logo{font-family:'Baloo 2',sans-serif;font-size:22px;font-weight:800;color:white;}
+    .btn-ouder-mode{background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);border-radius:10px;padding:8px 14px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:white;cursor:pointer;}
+    .kid-hero-section{text-align:center;padding:28px 20px 20px;}
+    .kid-pig-big{font-size:80px;display:block;animation:float 3s ease-in-out infinite;}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .kid-naam{font-family:'Baloo 2',sans-serif;font-size:28px;font-weight:800;color:white;margin-top:8px;}
+    .kid-balance-card{background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border-radius:24px;padding:20px;margin:0 20px 20px;border:1px solid rgba(255,255,255,0.25);text-align:center;}
+    .kid-balance-label{font-size:13px;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:4px;}
+    .kid-balance-amount{font-family:'Baloo 2',sans-serif;font-size:52px;font-weight:800;color:white;line-height:1;}
+    .kid-stats-row{display:flex;gap:10px;margin:0 20px 20px;}
+    .kid-stat-chip{flex:1;background:rgba(255,255,255,0.15);border-radius:14px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,0.2);}
+    .kid-stat-val{font-family:'Baloo 2',sans-serif;font-size:24px;font-weight:800;color:white;}
+    .kid-stat-lbl{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;}
+    .kid-tasks-section{background:white;border-radius:28px 28px 0 0;padding:24px 20px;min-height:50vh;}
+    .kid-tasks-title{font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:800;margin-bottom:16px;color:var(--text);}
+    .kid-task{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;border:2px solid transparent;}
+    .kid-task:active{transform:scale(0.98);}
+    .kid-task.klaar{background:var(--green-light);border-color:var(--green);}
+    .kid-task-dot{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s;}
+    .kid-task.klaar .kid-task-dot{background:var(--green);border-color:var(--green);color:white;}
+    .kid-task-emoji{font-size:26px;}
+    .kid-task-info{flex:1;}
+    .kid-task-naam{font-size:15px;font-weight:700;}
+    .kid-task-beloning{font-size:12px;color:var(--text-muted);margin-top:2px;}
+    .kid-task.klaar .kid-task-naam{color:var(--green-dark);}
+    .kid-task-reward{font-size:14px;font-weight:800;color:var(--amber);}
+    .kid-task.klaar .kid-task-reward{color:var(--green);}
+
+    /* PIN MODAL */
+    .pin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;align-items:center;justify-content:center;}
+    .pin-overlay.open{display:flex;}
+    .pin-box{background:white;border-radius:28px;padding:36px 28px;text-align:center;width:320px;animation:popIn 0.3s ease;}
+    .pin-title{font-family:'Baloo 2',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px;}
+    .pin-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+    .pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:24px;}
+    .pin-dot{width:16px;height:16px;border-radius:50%;background:var(--border);transition:all 0.2s;}
+    .pin-dot.filled{background:var(--green);}
+    .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .pin-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:16px;font-family:'Nunito',sans-serif;font-size:22px;font-weight:700;cursor:pointer;transition:all 0.15s;}
+    .pin-btn:hover{background:var(--green-light);border-color:var(--green);}
+    .pin-btn:active{transform:scale(0.95);}
+    .pin-error{color:var(--red);font-size:13px;font-weight:700;margin-top:12px;min-height:20px;}
+    .pin-setup-info{background:var(--amber-light);border-radius:12px;padding:12px;font-size:13px;color:#6B3D00;margin-bottom:16px;display:none;}
+
     @media(max-width:900px){
       .sidebar{display:none;}
       .main{margin-left:0;padding:16px;}
@@ -175,6 +222,9 @@
     <div class="nav-section">Menu</div>
     <button class="nav-item active">
       <div class="nav-icon">🏠</div><span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-item" onclick="naarKindScherm()">
+      <div class="nav-icon">🐷</div><span class="nav-label">Kindscherm</span>
     </button>
     <button class="nav-item" onclick="openModal('modal-uitdaging')">
       <div class="nav-icon">⚡</div><span class="nav-label">Uitdaging toevoegen</span>
@@ -343,6 +393,88 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- KID SCHERM -->
+<div class="kid-screen" id="kid-screen">
+  <div class="kid-header">
+    <div class="kid-logo">🐷 Kindgeld</div>
+    <button class="btn-ouder-mode" onclick="openPinModal('check')">🔒 Ouder</button>
+  </div>
+
+  <!-- KIND SELECTOR (meerdere kinderen) -->
+  <div id="kid-selector" style="display:flex;gap:8px;padding:12px 20px;overflow-x:auto"></div>
+
+  <div class="kid-hero-section">
+    <span class="kid-pig-big" id="kid-avatar-display">🐷</span>
+    <div class="kid-naam" id="kid-naam-display">-</div>
+  </div>
+
+  <div class="kid-balance-card">
+    <div class="kid-balance-label">Mijn spaarpot 💰</div>
+    <div class="kid-balance-amount" id="kid-saldo-display">€0,00</div>
+  </div>
+
+  <div class="kid-stats-row">
+    <div class="kid-stat-chip">
+      <div class="kid-stat-val" id="kid-munten-display">0</div>
+      <div class="kid-stat-lbl">🪙 Munten</div>
+    </div>
+    <div class="kid-stat-chip">
+      <div class="kid-stat-val" id="kid-streak-display">0</div>
+      <div class="kid-stat-lbl">🔥 Streak</div>
+    </div>
+    <div class="kid-stat-chip">
+      <div class="kid-stat-val" id="kid-klaar-display">0</div>
+      <div class="kid-stat-lbl">✅ Klaar</div>
+    </div>
+  </div>
+
+  <div class="kid-tasks-section">
+    <div class="kid-tasks-title">⚡ Mijn taken</div>
+    <div id="kid-tasks-list">
+      <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:14px">Nog geen taken</div>
+    </div>
+
+    <!-- CONFETTI bij alles klaar -->
+    <div id="kid-alles-klaar" style="display:none;text-align:center;padding:20px;background:var(--amber-light);border-radius:16px;margin-top:8px">
+      <div style="font-size:48px">🎉</div>
+      <div style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:800;color:var(--orange);margin-top:8px">Alles klaar!</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:4px">Super goed gedaan vandaag!</div>
+    </div>
+  </div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="pin-overlay" id="pin-overlay">
+  <div class="pin-box">
+    <div class="pin-title" id="pin-title">🔒 Oudermodus</div>
+    <div class="pin-sub" id="pin-sub">Voer je PIN in om door te gaan</div>
+    <div class="pin-setup-info" id="pin-setup-info">
+      Stel een 4-cijferige PIN in om je oudermodus te beveiligen.
+    </div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+      <div class="pin-dot" id="pd4"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-btn" onclick="pinInput('1')">1</button>
+      <button class="pin-btn" onclick="pinInput('2')">2</button>
+      <button class="pin-btn" onclick="pinInput('3')">3</button>
+      <button class="pin-btn" onclick="pinInput('4')">4</button>
+      <button class="pin-btn" onclick="pinInput('5')">5</button>
+      <button class="pin-btn" onclick="pinInput('6')">6</button>
+      <button class="pin-btn" onclick="pinInput('7')">7</button>
+      <button class="pin-btn" onclick="pinInput('8')">8</button>
+      <button class="pin-btn" onclick="pinInput('9')">9</button>
+      <button class="pin-btn" onclick="pinAnnuleren()" style="font-size:14px;color:var(--text-muted)">Sluiten</button>
+      <button class="pin-btn" onclick="pinInput('0')">0</button>
+      <button class="pin-btn" onclick="pinVerwijderen()" style="font-size:18px">⌫</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════ -->
 <!-- MODALS                                 -->
@@ -1144,6 +1276,180 @@ async function bijstorten() {
 async function uitloggen() {
   await db.auth.signOut();
   window.location.href = 'login.html';
+}
+
+// ── KIND MODUS ────────────────────────────────────────
+function naarKindScherm() {
+  document.querySelector('.sidebar').style.display = 'none';
+  document.querySelector('.main').style.display = 'none';
+  document.getElementById('kid-screen').style.display = 'block';
+  laadKidScherm();
+}
+
+function naarOuderScherm() {
+  document.querySelector('.sidebar').style.display = 'flex';
+  document.querySelector('.main').style.display = 'block';
+  document.getElementById('kid-screen').style.display = 'none';
+}
+
+function laadKidScherm() {
+  if (!huidigKind) return;
+
+  // Kind selector tabs (als meerdere kinderen)
+  const sel = document.getElementById('kid-selector');
+  sel.innerHTML = '';
+  kinderen.forEach((k, i) => {
+    const btn = document.createElement('button');
+    btn.style.cssText = `background:${k.id === huidigKind.id ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'};border:1.5px solid rgba(255,255,255,0.3);border-radius:20px;padding:6px 14px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:white;cursor:pointer;white-space:nowrap;`;
+    btn.textContent = `${k.avatar} ${k.naam}`;
+    btn.onclick = () => { selecteerKind(k); laadKidScherm(); };
+    sel.appendChild(btn);
+  });
+  if (kinderen.length <= 1) sel.style.display = 'none';
+
+  // Stats
+  document.getElementById('kid-avatar-display').textContent = huidigKind.avatar;
+  document.getElementById('kid-naam-display').textContent = huidigKind.naam;
+  document.getElementById('kid-saldo-display').textContent = euro(huidigKind.saldo);
+  document.getElementById('kid-munten-display').textContent = huidigKind.munten || 0;
+  document.getElementById('kid-streak-display').textContent = huidigKind.streak || 0;
+
+  // Taken renderen
+  renderKidTaken();
+}
+
+function renderKidTaken() {
+  const container = document.getElementById('kid-tasks-list');
+  const vandaag = new Date().toDateString();
+
+  if (uitdagingen.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:32px 20px;color:var(--text-muted);font-size:14px">
+      <div style="font-size:40px;margin-bottom:8px">😴</div>
+      Nog geen taken van je ouder!
+    </div>`;
+    document.getElementById('kid-alles-klaar').style.display = 'none';
+    document.getElementById('kid-klaar-display').textContent = 0;
+    return;
+  }
+
+  const klaarCount = uitdagingen.filter(u => u.voltooid).length;
+  document.getElementById('kid-klaar-display').textContent = klaarCount;
+
+  if (klaarCount === uitdagingen.length) {
+    container.innerHTML = '';
+    document.getElementById('kid-alles-klaar').style.display = 'block';
+  } else {
+    document.getElementById('kid-alles-klaar').style.display = 'none';
+  }
+
+  container.innerHTML = uitdagingen.map(u => `
+    <div class="kid-task ${u.voltooid ? 'klaar' : ''}" onclick="kidToggleTask('${u.id}', ${u.voltooid})">
+      <div class="kid-task-dot">${u.voltooid ? '✓' : ''}</div>
+      <span class="kid-task-emoji">${u.emoji || '⚡'}</span>
+      <div class="kid-task-info">
+        <div class="kid-task-naam">${u.naam}</div>
+        <div class="kid-task-beloning">${u.herhaling || 'eenmalig'}</div>
+      </div>
+      <div class="kid-task-reward">${u.voltooid ? '✓ Klaar!' : `+🪙${u.beloning_munten || 5}`}</div>
+    </div>
+  `).join('');
+}
+
+async function kidToggleTask(id, wasVoltooid) {
+  await toggleUitdaging(id, wasVoltooid);
+  renderKidTaken();
+
+  // Check of alles klaar is
+  const klaarCount = uitdagingen.filter(u => u.voltooid).length;
+  document.getElementById('kid-klaar-display').textContent = klaarCount;
+  document.getElementById('kid-saldo-display').textContent = euro(huidigKind.saldo);
+  document.getElementById('kid-munten-display').textContent = huidigKind.munten || 0;
+  if (klaarCount === uitdagingen.length) {
+    setTimeout(() => {
+      document.getElementById('kid-tasks-list').innerHTML = '';
+      document.getElementById('kid-alles-klaar').style.display = 'block';
+    }, 500);
+  }
+}
+
+// ── PIN SYSTEEM ───────────────────────────────────────
+let pinBuffer = '';
+let pinModus = 'check'; // 'check' of 'setup'
+const PIN_KEY = 'kindgeld_ouder_pin';
+
+function openPinModal(modus) {
+  pinModus = modus;
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-overlay').classList.add('open');
+
+  const heeftPin = localStorage.getItem(PIN_KEY);
+  if (modus === 'check' && !heeftPin) {
+    // Nog geen PIN → stel eerst in
+    pinModus = 'setup';
+    document.getElementById('pin-title').textContent = '🔑 PIN instellen';
+    document.getElementById('pin-sub').textContent = 'Kies een 4-cijferige PIN voor oudermodus';
+    document.getElementById('pin-setup-info').style.display = 'block';
+  } else if (modus === 'check') {
+    document.getElementById('pin-title').textContent = '🔒 Oudermodus';
+    document.getElementById('pin-sub').textContent = 'Voer je PIN in om door te gaan';
+    document.getElementById('pin-setup-info').style.display = 'none';
+  } else if (modus === 'wijzigen') {
+    document.getElementById('pin-title').textContent = '🔑 PIN wijzigen';
+    document.getElementById('pin-sub').textContent = 'Voer een nieuwe 4-cijferige PIN in';
+    document.getElementById('pin-setup-info').style.display = 'block';
+  }
+}
+
+function pinInput(cijfer) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += cijfer;
+  updatePinDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(() => verwerkPin(), 200);
+  }
+}
+
+function pinVerwijderen() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function pinAnnuleren() {
+  document.getElementById('pin-overlay').classList.remove('open');
+  pinBuffer = '';
+}
+
+function updatePinDots() {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('pd' + i).classList.toggle('filled', i <= pinBuffer.length);
+  }
+}
+
+function verwerkPin() {
+  const opgeslagenPin = localStorage.getItem(PIN_KEY);
+
+  if (pinModus === 'setup' || pinModus === 'wijzigen') {
+    localStorage.setItem(PIN_KEY, pinBuffer);
+    document.getElementById('pin-overlay').classList.remove('open');
+    toonToast('🔑 PIN ingesteld!', 'success');
+    naarOuderScherm();
+  } else {
+    // Check PIN
+    if (pinBuffer === opgeslagenPin) {
+      document.getElementById('pin-overlay').classList.remove('open');
+      naarOuderScherm();
+    } else {
+      document.getElementById('pin-error').textContent = '❌ Onjuiste PIN, probeer opnieuw';
+      pinBuffer = '';
+      updatePinDots();
+      // Schudden animatie
+      document.querySelector('.pin-box').style.animation = 'none';
+      setTimeout(() => document.querySelector('.pin-box').style.animation = '', 10);
+    }
+  }
 }
 
 // ── HELPERS ──────────────────────────────────────────
