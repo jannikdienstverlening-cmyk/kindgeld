@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kindgeld — Leer je kind slim sparen 🐷</title>
   <meta name="description" content="De leukste manier om je kind te leren sparen. Spaardoelen, uitdagingen en beloningen — alles op één plek. Gratis beginnen!">
+  <!-- Open Graph / Social Media -->
+  <meta property="og:title" content="Kindgeld — Leer je kind slim sparen 🐷">
+  <meta property="og:description" content="Spaardoelen, uitdagingen en beloningen voor kinderen. Gratis beginnen — al 2.400+ gezinnen gingen je voor.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kindgeld.nl">
+  <meta property="og:image" content="https://kindgeld.nl/og-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Kindgeld — Leer je kind slim sparen 🐷">
+  <meta name="twitter:description" content="Spaardoelen, uitdagingen en beloningen voor kinderen. Gratis starten!">
+  <!-- Google Analytics 4 — vervang G-XXXXXXXXXX met jouw eigen Measurement ID via analytics.google.com -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -333,6 +350,119 @@
     .footer-links a:hover { color:white; }
     .footer-copy { font-size:12px; }
 
+    /* ── TRUST STRIP ── */
+    .trust-strip {
+      background: var(--text); padding: 14px 40px;
+    }
+    .trust-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 24px;
+    }
+    .trust-item {
+      font-size: 13px; color: rgba(255,255,255,0.75); font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .trust-divider { color: rgba(255,255,255,0.2); }
+
+    /* ── URGENCY BADGE ── */
+    .urgency-note {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 700; color: var(--orange);
+      margin-top: 12px;
+    }
+    .urgency-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--orange); animation: wiggle 1s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    /* ── EMAIL POPUP ── */
+    .email-popup-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 999;
+      align-items: center; justify-content: center; padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .email-popup-overlay.show { display: flex; }
+    .email-popup-box {
+      background: white; border-radius: 28px;
+      padding: 44px 36px; max-width: 460px; width: 100%;
+      position: relative; text-align: center;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+      animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .popup-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--bg); border: none; cursor: pointer;
+      font-size: 16px; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .popup-close:hover { background: #E5E5E0; }
+    .popup-emoji { font-size: 56px; display: block; margin-bottom: 12px; animation: float 3s ease-in-out infinite; }
+    .popup-title { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
+    .popup-title .green { color: var(--green); }
+    .popup-sub { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+    .popup-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .popup-input {
+      flex: 1; padding: 13px 16px; border-radius: 12px;
+      border: 1.5px solid var(--border); font-family: 'Nunito', sans-serif;
+      font-size: 14px; outline: none; background: var(--bg);
+      transition: border-color 0.2s;
+    }
+    .popup-input:focus { border-color: var(--green); }
+    .btn-popup {
+      padding: 13px 20px; background: var(--green); color: white;
+      border: none; border-radius: 12px; font-family: 'Nunito', sans-serif;
+      font-size: 14px; font-weight: 800; cursor: pointer;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .btn-popup:hover { background: var(--green-dark); }
+    .popup-disclaimer { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+    .popup-thanks { display: none; }
+    .popup-thanks .popup-emoji { font-size: 48px; }
+
+    /* ── LANDING FAQ ── */
+    .landing-faq { padding: 80px 40px; background: var(--green-light); }
+    .landing-faq-inner { max-width: 720px; margin: 0 auto; }
+    .landing-faq .faq-item {
+      background: white; border-radius: 16px; padding: 0;
+      margin-bottom: 10px; border: 1px solid rgba(29,158,117,0.15);
+      overflow: hidden;
+    }
+    .landing-faq .faq-q {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 22px; cursor: pointer; gap: 12px; user-select: none;
+    }
+    .landing-faq .faq-arrow {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--green-light); display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--green); flex-shrink: 0;
+      transition: transform 0.25s;
+    }
+    .landing-faq .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .landing-faq .faq-a {
+      font-size: 14px; color: var(--text-muted); line-height: 1.7;
+      padding: 0 22px; max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .landing-faq .faq-item.open .faq-a { max-height: 200px; padding: 0 22px 18px; }
+
+    /* ── GARANTIE BANNER ── */
+    .garantie-banner {
+      background: linear-gradient(135deg, var(--green-light), #c8f0e0);
+      border: 1.5px solid rgba(29,158,117,0.25);
+      border-radius: 18px; padding: 18px 28px;
+      display: flex; align-items: center; gap: 16px;
+      max-width: 700px; margin: 0 auto 32px; text-align: left;
+    }
+    .garantie-icon { font-size: 36px; flex-shrink: 0; }
+    .garantie-text strong { font-size: 15px; font-weight: 800; color: var(--green-dark); display: block; }
+    .garantie-text span { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
     /* ── RESPONSIVE ── */
     @media (max-width:900px) {
       .hero { grid-template-columns:1fr; text-align:center; padding:40px 20px; gap:40px; min-height:auto; }
@@ -386,16 +516,20 @@
       🎉 Al 2.400+ gezinnen gaan je voor
     </div>
     <h1 class="fade-up delay-1">
-      Leer je kind<br>
-      <span class="green">slim sparen</span><br>
-      <span class="orange">op een leuke manier</span>
+      Eindelijk: kinderen<br>
+      die <span class="green">zelf sparen</span><br>
+      <span class="orange">zonder gedoe 🎉</span>
     </h1>
     <p class="hero-sub fade-up delay-2">
-      Kindgeld maakt sparen leuk met spaardoelen, uitdagingen en beloningen. Jij behoudt de controle, je kind leert financieel verantwoordelijk zijn.
+      Kindgeld vervangt dagelijkse ruzie over zakgeld door echte motivatie. Ouders besparen gemiddeld <strong>2+ uur per week</strong> aan discussies — terwijl hun kind leert sparen voor écht doelen.
     </p>
     <div class="hero-cta fade-up delay-3">
-      <a href="login.html" class="btn-hero-primary">🐷 Gratis beginnen</a>
+      <a href="login.html" class="btn-hero-primary">🐷 Gratis beginnen — 60 seconden</a>
       <a href="#hoe-werkt-het" class="btn-hero-secondary">Hoe werkt het? →</a>
+    </div>
+    <div class="urgency-note fade-up delay-4">
+      <span class="urgency-dot"></span>
+      Start vandaag gratis · Geen creditcard nodig · Direct toegang
     </div>
     <div class="hero-social-proof fade-up delay-4">
       <div class="avatars">
@@ -467,6 +601,21 @@
     </div>
   </div>
 </section>
+
+<!-- TRUST STRIP -->
+<div class="trust-strip">
+  <div class="trust-inner">
+    <span class="trust-item">🔒 SSL-beveiligd</span>
+    <span class="trust-divider">·</span>
+    <span class="trust-item">✅ Veilig betalen via Stripe</span>
+    <span class="trust-divider">·</span>
+    <span class="trust-item">🏦 iDEAL · Visa · Mastercard</span>
+    <span class="trust-divider">·</span>
+    <span class="trust-item">↩️ 30 dagen geld-terug garantie</span>
+    <span class="trust-divider">·</span>
+    <span class="trust-item">⭐ 4,9 beoordeling</span>
+  </div>
+</div>
 
 <!-- STATS BAR -->
 <div class="stats-bar">
@@ -631,6 +780,15 @@
     <div class="section-label">Prijzen</div>
     <h2 class="section-title">Begin gratis, upgrade wanneer je wilt</h2>
     <p class="section-sub">Geen verplichtingen. Geen verborgen kosten. Altijd opzegbaar.</p>
+    <div style="margin-top: 24px;">
+      <div class="garantie-banner">
+        <span class="garantie-icon">🛡️</span>
+        <div class="garantie-text">
+          <strong>30 dagen geld-terug garantie</strong>
+          <span>Niet tevreden? Geen vragen, volledige terugbetaling — wij nemen het risico.</span>
+        </div>
+      </div>
+    </div>
 
     <div class="pricing-cards">
       <div class="pricing-card">
@@ -662,7 +820,7 @@
           <li><span class="p-check">✓</span> Automatisch zakgeld</li>
           <li><span class="p-check">✓</span> Eerste maand gratis</li>
         </ul>
-        <button class="btn-pricing btn-p-green" onclick="window.location.href='abonnement.html'">Starten — gratis proberen</button>
+        <button class="btn-pricing btn-p-green" onclick="gtag('event','click_pricing_gezin');window.location.href='abonnement.html'">🎁 14 dagen gratis proberen →</button>
       </div>
 
       <div class="pricing-card">
@@ -678,10 +836,58 @@
           <li><span class="p-check">✓</span> Prioriteit support</li>
           <li><span class="p-check">✓</span> 30 dagen garantie</li>
         </ul>
-        <button class="btn-pricing btn-p-outline" onclick="window.location.href='abonnement.html'" style="border-color:var(--green);color:var(--green)">Jaarplan kiezen</button>
+        <button class="btn-pricing btn-p-outline" onclick="gtag('event','click_pricing_jaar');window.location.href='abonnement.html'" style="border-color:var(--green);color:var(--green)">🚀 Jaarplan kiezen — bespaar €20</button>
       </div>
     </div>
     <p class="pricing-btw-disclaimer">Alle prijzen zijn inclusief 21% BTW. Je ontvangt na betaling een factuur per e-mail.</p>
+  </div>
+</section>
+
+<!-- LANDING FAQ -->
+<section class="landing-faq" id="faq">
+  <div class="landing-faq-inner">
+    <div class="section-label" style="text-align:center">Veelgestelde vragen</div>
+    <h2 class="section-title" style="text-align:center;margin-bottom:32px">Alles wat je wil weten 💬</h2>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Is Kindgeld echt gratis te beginnen?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a">Ja, volledig gratis — geen creditcard nodig. Je krijgt 1 kindprofiel, 1 spaardoel en basis uitdagingen. Upgrade naar Gezin of Jaar wanneer je meer wilt, met 14 dagen gratis proberen.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Hoe oud moet mijn kind zijn?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a">Kindgeld werkt het beste voor kinderen van 5 tot 14 jaar. Jonge kinderen (5-8) leren omgaan met spaardoelen en eenvoudige uitdagingen. Oudere kinderen (9-14) profiteren meer van de beloningenwinkel en statistieken.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Kan ik altijd opzeggen?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a">Ja, je kunt op elk moment opzeggen — gewoon via je profielinstellingen. Geen gedoe, geen verborgen kosten. Je behoudt toegang tot het einde van je betaalperiode.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Hoe zit het met privacy en beveiliging?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a">Je data is veilig opgeslagen in Europa (Supabase / PostgreSQL) en nooit gedeeld met derden. Betalingen verlopen via Stripe — een PCI DSS Level 1 gecertificeerde betaalprovider. Wij slaan nooit je kaartgegevens op.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Werkt het ook op tablet en telefoon?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a">Ja! Kindgeld werkt op elk apparaat — smartphone, tablet en computer. Je kunt de app ook aan je homescreen toevoegen zodat het voelt als een echte app, zonder download.</div>
+    </div>
   </div>
 </section>
 
@@ -702,7 +908,7 @@
       <a href="#">Voorwaarden</a>
       <a href="#">Contact</a>
     </div>
-    <div class="footer-copy">© 2025 Kindgeld · Jannik Dienstverlening</div>
+    <div class="footer-copy">© 2026 Kindgeld · Jannik Dienstverlening · KvK: 00000000 · BTW: NL000000000B01</div>
   </div>
 </footer>
 
@@ -728,6 +934,60 @@
     el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     observer.observe(el);
   });
+</script>
+
+<!-- EMAIL POPUP -->
+<div class="email-popup-overlay" id="emailPopupOverlay">
+  <div class="email-popup-box">
+    <button class="popup-close" onclick="sluitPopup()" aria-label="Sluiten">✕</button>
+
+    <div id="popupFormState">
+      <span class="popup-emoji">📚</span>
+      <div class="popup-title">Gratis gids: <span class="green">Leer je kind omgaan met geld</span></div>
+      <p class="popup-sub">Ontvang onze gratis gids met 10 praktische tips voor ouders — inclusief hoe je zakgeld het beste instelt per leeftijd.</p>
+      <div class="popup-input-row">
+        <input type="email" id="popupEmail" class="popup-input" placeholder="jouw@email.nl" autocomplete="email">
+        <button class="btn-popup" onclick="verstuurPopupEmail()">Sturen →</button>
+      </div>
+      <p class="popup-disclaimer">Geen spam. Alleen handige tips. Altijd afmelden mogelijk.</p>
+    </div>
+
+    <div id="popupThanksState" class="popup-thanks">
+      <span class="popup-emoji">🎉</span>
+      <div class="popup-title">Verstuurd!</div>
+      <p class="popup-sub" style="margin-bottom:20px">Bedankt! Check je inbox — de gids is onderweg.<br><small style="color:var(--text-muted)">Niet ontvangen? Check je spammap.</small></p>
+      <button class="btn-popup" style="width:100%;padding:14px" onclick="sluitPopup()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Email popup na 30 seconden (niet tonen als al getoond deze sessie)
+  if (!sessionStorage.getItem('popupGetoond')) {
+    setTimeout(function() {
+      document.getElementById('emailPopupOverlay').classList.add('show');
+      sessionStorage.setItem('popupGetoond', '1');
+    }, 30000);
+  }
+
+  function sluitPopup() {
+    document.getElementById('emailPopupOverlay').classList.remove('show');
+  }
+
+  // Sluit popup bij klik buiten de box
+  document.getElementById('emailPopupOverlay').addEventListener('click', function(e) {
+    if (e.target === this) sluitPopup();
+  });
+
+  function verstuurPopupEmail() {
+    var email = document.getElementById('popupEmail').value.trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('popupEmail').style.borderColor = 'var(--red)';
+      return;
+    }
+    // Stuur naar bedankt.html
+    window.location.href = 'bedankt.html?email=' + encodeURIComponent(email);
+  }
 </script>
 
 </body>

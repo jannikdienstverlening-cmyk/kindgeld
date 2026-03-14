@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kindgeld — Bedankt voor je inschrijving!</title>
+  <meta name="description" content="Bedankt! Je gratis gids is onderweg naar je inbox.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #1D9E75; --green-dark: #085041; --green-light: #E1F5EE;
+      --orange: #D85A30; --amber: #EF9F27;
+      --text: #1a1a1a; --text-muted: #6b7280;
+      --border: rgba(0,0,0,0.09); --bg: #FAFAF8; --white: #ffffff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif; background: var(--bg);
+      min-height: 100vh; display: flex; flex-direction: column;
+      color: var(--text);
+    }
+    @keyframes float  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes popIn  { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+    @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+
+    .bg-shapes { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .shape { position: absolute; border-radius: 50%; }
+    .shape-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(29,158,117,0.12) 0%, transparent 70%); top: -200px; right: -150px; }
+    .shape-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(239,159,39,0.08) 0%, transparent 70%); bottom: -100px; left: -100px; }
+
+    .confetti-piece { position: fixed; top: -30px; font-size: 22px; pointer-events: none; z-index: 200; animation: confettiFall linear forwards; }
+
+    nav { position: relative; z-index: 10; padding: 20px 40px; max-width: 900px; margin: 0 auto; width: 100%; }
+    .logo { font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; color: var(--orange); text-decoration: none; }
+    .logo span { color: var(--green); }
+
+    main {
+      position: relative; z-index: 1; flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px 24px 60px;
+    }
+
+    .bedankt-card {
+      background: var(--white); border-radius: 28px;
+      padding: 52px 44px; max-width: 520px; width: 100%;
+      border: 1.5px solid var(--border);
+      box-shadow: 0 20px 56px rgba(0,0,0,0.12);
+      text-align: center;
+      animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+
+    .bedankt-emoji { font-size: 72px; display: block; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+
+    .bedankt-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green-light); border: 1px solid rgba(29,158,117,0.25);
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 13px; font-weight: 700; color: var(--green-dark);
+      margin-bottom: 20px;
+    }
+    .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+
+    .bedankt-title { font-family: 'Baloo 2', sans-serif; font-size: 34px; font-weight: 800; margin-bottom: 10px; color: var(--text); line-height: 1.2; }
+    .bedankt-sub { font-size: 16px; color: var(--text-muted); line-height: 1.7; margin-bottom: 32px; }
+
+    .what-next {
+      background: var(--green-light); border-radius: 18px;
+      padding: 24px; margin-bottom: 32px; text-align: left;
+      border: 1px solid rgba(29,158,117,0.2);
+    }
+    .what-next-title { font-family: 'Baloo 2', sans-serif; font-size: 15px; font-weight: 800; color: var(--green-dark); margin-bottom: 14px; }
+    .what-next ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .what-next li { font-size: 14px; color: var(--green-dark); font-weight: 600; display: flex; gap: 8px; align-items: flex-start; line-height: 1.4; }
+    .what-next li::before { content: '✓'; font-weight: 900; flex-shrink: 0; }
+
+    .btn-start {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+      color: white; border: none; border-radius: 16px;
+      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
+      cursor: pointer; text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 6px 20px rgba(29,158,117,0.35);
+      transition: all 0.2s; margin-bottom: 12px;
+    }
+    .btn-start:hover { filter: brightness(1.06); }
+
+    .link-home { font-size: 14px; color: var(--text-muted); text-decoration: none; font-weight: 600; transition: color 0.15s; }
+    .link-home:hover { color: var(--green); }
+
+    @media (max-width: 600px) { .bedankt-card { padding: 36px 24px; } .bedankt-title { font-size: 28px; } }
+  </style>
+</head>
+<body>
+
+<div class="bg-shapes">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+</div>
+
+<nav>
+  <a href="index.html" class="logo">Kind<span>geld</span></a>
+</nav>
+
+<main>
+  <div class="bedankt-card">
+    <span class="bedankt-emoji">📬</span>
+
+    <div class="bedankt-badge">
+      <span class="badge-dot"></span>
+      Inschrijving bevestigd
+    </div>
+
+    <div class="bedankt-title">De gids is onderweg!</div>
+
+    <div class="bedankt-sub">
+      Bedankt voor je inschrijving! Check je inbox voor de gratis gids <em>"Hoe leer je kinderen omgaan met geld"</em>.<br>
+      <small style="color:var(--text-muted)">Niet ontvangen? Check je spammap.</small>
+    </div>
+
+    <div class="what-next">
+      <div class="what-next-title">📚 In de gids lees je:</div>
+      <ul>
+        <li>Hoe je zakgeld instelt per leeftijd (5 t/m 14 jaar)</li>
+        <li>De 3 regels van slimme ouders bij financiële opvoeding</li>
+        <li>Welke beloningen kinderen het meest motiveren</li>
+        <li>Hoe je spaardoelen instelt die écht werken</li>
+      </ul>
+    </div>
+
+    <a href="login.html" class="btn-start">
+      🐷 Gratis beginnen met Kindgeld →
+    </a>
+    <a href="index.html" class="link-home">Terug naar de homepage</a>
+  </div>
+</main>
+
+<script>
+  // Confetti
+  var confetti = ['🎉','📚','✨','🌟','💚','🥳','📬'];
+  for (var i = 0; i < 16; i++) {
+    (function(idx) {
+      setTimeout(function() {
+        var el = document.createElement('span');
+        el.className = 'confetti-piece';
+        el.textContent = confetti[idx % confetti.length];
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+        el.style.fontSize = (16 + Math.random() * 16) + 'px';
+        document.body.appendChild(el);
+        setTimeout(function() { el.remove(); }, 5000);
+      }, idx * 120);
+    })(i);
+  }
+</script>
+</body>
+</html>
