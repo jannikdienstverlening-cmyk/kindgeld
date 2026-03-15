@@ -1,14 +1,16 @@
 import Stripe from 'https://esm.sh/stripe@14?target=deno&no-check';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno';
 
+// Waarden worden ingesteld via Supabase Vault (Settings → Vault)
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
+
 Deno.serve(async (req: Request) => {
   const signature = req.headers.get('stripe-signature');
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
   const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY');
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-  if (!signature || !webhookSecret || !stripeSecret) {
+  if (!signature || !stripeSecret) {
     return new Response('Configuratiefout', { status: 500 });
   }
 
@@ -17,7 +19,7 @@ Deno.serve(async (req: Request) => {
   let event: Stripe.Event;
   try {
     const stripe = new Stripe(stripeSecret, { apiVersion: '2023-10-16' });
-    event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
+    event = await stripe.webhooks.constructEventAsync(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Webhook signature verificatie mislukt:', err);
     return new Response('Ongeldige signature', { status: 400 });
@@ -33,7 +35,6 @@ Deno.serve(async (req: Request) => {
       return new Response('Missende metadata', { status: 400 });
     }
 
-    // Bereken verloopdatum
     let planVerlooptOp: string | null = null;
     if (session.subscription) {
       const stripe = new Stripe(stripeSecret, { apiVersion: '2023-10-16' });
@@ -41,7 +42,7 @@ Deno.serve(async (req: Request) => {
       planVerlooptOp = new Date(sub.current_period_end * 1000).toISOString();
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { error } = await supabase
       .from('profielen')
       .update({ plan, plan_verloopt_op: planVerlooptOp })
