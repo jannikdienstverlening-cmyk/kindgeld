@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Blokkeer app-schermen (geen SEO-waarde)
+Disallow: /dashboard.html
+Disallow: /kindscherm.html
+Disallow: /beloningen.html
+Disallow: /spaardoel.html
+Disallow: /profiel-aanmaken.html
+
+# Sitemap
+Sitemap: https://kindgeld.nl/sitemap.xml
