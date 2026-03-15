@@ -1006,6 +1006,12 @@
   var SUPABASE_URL = 'https://ysdwxbwfbayygujlshxi.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzZHd4YndmYmF5eWd1amxzaHhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTc5OTMsImV4cCI6MjA4ODk5Mzk5M30.qsxpi4ls-5pLzLMVxzwfuF1YenB4ZpML8KE8QOq1mek';
 
+  var _supabase = null;
+  function getSupabase() {
+    if (!_supabase) _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return _supabase;
+  }
+
   function startCheckout(plan) {
     var btn = document.getElementById('btn-' + plan);
     var origHTML = btn.innerHTML;
@@ -1017,28 +1023,36 @@
       gtag('event', 'begin_checkout', { plan: plan, billing: isYearly ? 'yearly' : 'monthly' });
     }
 
-    fetch(SUPABASE_URL + '/functions/v1/stripe-checkout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({ plan: plan, billing: isYearly ? 'yearly' : 'monthly' }),
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
+    getSupabase().auth.getSession().then(function(result) {
+      var session = result.data.session;
+      if (!session) {
+        window.location.href = 'login.html?redirect=abonnement.html';
+        return;
+      }
+
+      fetch(SUPABASE_URL + '/functions/v1/stripe-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + session.access_token,
+        },
+        body: JSON.stringify({ plan: plan, billing: isYearly ? 'yearly' : 'monthly' }),
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = origHTML;
+          showToast('Er ging iets mis: ' + (data.error || 'Onbekende fout'), 'error');
+        }
+      })
+      .catch(function(err) {
         btn.disabled = false;
         btn.innerHTML = origHTML;
-        showToast('Er ging iets mis: ' + (data.error || 'Onbekende fout'), 'error');
-      }
-    })
-    .catch(function(err) {
-      btn.disabled = false;
-      btn.innerHTML = origHTML;
-      showToast('Verbindingsfout: ' + err.message, 'error');
+        showToast('Verbindingsfout: ' + err.message, 'error');
+      });
     });
   }
 
@@ -1065,6 +1079,7 @@
     window.location.href = 'dashboard.html';
   });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="cookie-consent.js"></script>
 </body>
 </html>

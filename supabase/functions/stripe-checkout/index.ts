@@ -1,4 +1,5 @@
 import Stripe from 'https://esm.sh/stripe@14?target=deno&no-check';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,7 +8,6 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req: Request) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
@@ -20,6 +20,21 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // Haal ingelogde gebruiker op via JWT
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Niet ingelogd' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { plan, billing } = await req.json() as { plan: string; billing: string };
 
     if (!plan || !billing) {
@@ -29,7 +44,6 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Bepaal Price ID op basis van plan
     const PRICE_IDS: Record<string, string> = {
       gezin: 'price_1TAqAYBn5uqX2edBNZFtHVKI',
       jaar:  'price_1TAqAZBn5uqX2edBrmMtXu04',
@@ -51,11 +65,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const stripe = new Stripe(secretKey, {
-      apiVersion: '2023-10-16',
-    });
-
-    // Bepaal origin voor success/cancel URLs
+    const stripe = new Stripe(secretKey, { apiVersion: '2023-10-16' });
     const origin = req.headers.get('origin') || 'https://kindgeld.nl';
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -63,22 +73,16 @@ Deno.serve(async (req: Request) => {
       mode: 'subscription',
       locale: 'nl',
       allow_promotion_codes: true,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: `${origin}/succes.html?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/annuleer.html`,
+      customer_email: user.email,
+      metadata: { user_id: user.id, plan },
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${origin}/dashboard.html?success=true&plan=${plan}`,
+      cancel_url: `${origin}/abonnement.html`,
+      subscription_data: {
+        metadata: { user_id: user.id, plan },
+        ...(plan === 'gezin' ? { trial_period_days: 14 } : {}),
+      },
     };
-
-    // Eerste maand gratis trial voor Gezin plan
-    if (plan === 'gezin') {
-      sessionParams.subscription_data = {
-        trial_period_days: 30,
-      };
-    }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
 
