@@ -90,7 +90,9 @@
     @keyframes pulse    { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(.9)} }
     @keyframes spin     { to{transform:rotate(360deg)} }
     @keyframes fadeUp   { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes shimmer  { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+    @keyframes shimmer      { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+    @keyframes btnShimmer   { 0%{left:-100%} 60%,100%{left:150%} }
+    @keyframes featuredGlow { 0%,100%{box-shadow:0 0 0 4px rgba(29,158,117,.10),0 8px 32px rgba(29,158,117,.18)} 50%{box-shadow:0 0 0 7px rgba(29,158,117,.18),0 14px 48px rgba(29,158,117,.30)} }
 
     /* ── ACHTERGROND ── */
     .bg-shapes { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
@@ -187,25 +189,33 @@
     }
     .plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 
-    /* FEATURED (GEZIN) */
+    /* FEATURED (GEZIN) — Premium */
     .plan-card.featured {
       border: 2.5px solid var(--green);
-      box-shadow: 0 0 0 4px rgba(29,158,117,0.08), var(--shadow-md);
-      padding-top: 36px;
+      background: linear-gradient(160deg, #f0fdf8 0%, #e5f9ef 55%, #f2fdf8 100%);
+      padding-top: 44px;
+      transform: scale(1.04);
+      z-index: 2;
+      animation: featuredGlow 3s ease-in-out infinite;
     }
-    .plan-card.featured:hover { transform: translateY(-6px); box-shadow: 0 0 0 4px rgba(29,158,117,0.12), var(--shadow-lg); }
+    .plan-card.featured:hover {
+      transform: scale(1.04) translateY(-6px);
+      box-shadow: 0 0 0 5px rgba(29,158,117,0.18), 0 18px 52px rgba(29,158,117,0.30);
+    }
 
     .featured-badge {
-      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #1d9e75 0%, #2d7a4f 100%);
       color: white; font-size: 12px; font-weight: 800;
-      padding: 5px 18px; border-radius: 20px; white-space: nowrap;
-      display: flex; align-items: center; gap: 6px;
-      box-shadow: 0 4px 12px rgba(29,158,117,0.35);
+      padding: 6px 22px; border-radius: 20px; white-space: nowrap;
+      display: flex; align-items: center; gap: 7px;
+      box-shadow: 0 4px 16px rgba(29,158,117,0.45), 0 1px 3px rgba(0,0,0,0.12);
+      letter-spacing: 0.3px;
     }
     .featured-badge-dot {
       width: 7px; height: 7px; border-radius: 50%;
-      background: var(--amber); animation: pulse 1.4s ease-in-out infinite;
+      background: #ffd166; animation: pulse 1.4s ease-in-out infinite;
+      box-shadow: 0 0 6px rgba(255,209,102,0.7);
     }
 
     .plan-icon { font-size: 38px; margin-bottom: 12px; display: block; }
@@ -217,7 +227,7 @@
     .price-row { display: flex; align-items: baseline; gap: 2px; }
     .price-currency { font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); margin-top: 6px; }
     .price-amount { font-family: 'Baloo 2', sans-serif; font-size: 54px; font-weight: 800; color: var(--text); line-height: 1; }
-    .plan-card.featured .price-amount { color: var(--green-dark); }
+    .plan-card.featured .price-amount { color: var(--green-dark); font-size: 68px; }
     .price-period { font-size: 15px; font-weight: 600; color: var(--text-muted); align-self: flex-end; margin-bottom: 6px; }
     .price-orig { font-size: 13px; color: var(--text-muted); text-decoration: line-through; margin-top: 2px; }
     .price-note { font-size: 13px; font-weight: 700; margin-top: 4px; margin-bottom: 20px; }
@@ -254,12 +264,20 @@
     .btn-gratis:hover { background: #F0F0EC; }
 
     .btn-gezin {
-      background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+      background: linear-gradient(135deg, #1d9e75 0%, #2d7a4f 100%);
       color: white; padding: 16px;
       box-shadow: 0 6px 20px rgba(29,158,117,0.35);
       font-size: 16px;
+      overflow: hidden; position: relative;
     }
-    .btn-gezin:hover { box-shadow: 0 8px 28px rgba(29,158,117,0.45); filter: brightness(1.05); }
+    .btn-gezin::after {
+      content: ''; position: absolute; top: 0; left: -100%;
+      width: 55%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+      animation: btnShimmer 2.8s ease-in-out infinite;
+      border-radius: inherit; pointer-events: none;
+    }
+    .btn-gezin:hover { box-shadow: 0 8px 28px rgba(29,158,117,0.50); filter: brightness(1.06); }
 
     .btn-jaar {
       background: var(--white); color: var(--green);
@@ -512,7 +530,7 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 840px) {
       .plans-grid { grid-template-columns: 1fr; max-width: 440px; margin-left: auto; margin-right: auto; }
-      .plan-card.featured { transform: none; }
+      .plan-card.featured { transform: none; animation: none; }
       .plan-card.featured:hover { transform: translateY(-4px); }
       nav { padding: 16px 20px; }
       .hero h1 { font-size: 34px; }
@@ -631,7 +649,7 @@
     <div class="plan-card featured">
       <div class="featured-badge">
         <span class="featured-badge-dot"></span>
-        Meest populair
+        Meest gekozen
       </div>
       <span class="plan-icon">🏠</span>
       <div class="plan-name">Gezin</div>
@@ -1036,7 +1054,7 @@
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + session.access_token,
         },
-        body: JSON.stringify({ plan: plan, billing: isYearly ? 'yearly' : 'monthly' }),
+        body: JSON.stringify({ plan: plan }),
       })
       .then(function(res) { return res.json(); })
       .then(function(data) {
